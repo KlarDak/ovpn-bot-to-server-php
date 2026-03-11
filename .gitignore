@@ -1,0 +1,6 @@
+pja-package.json
+/vendor/
+.env
+public/
+tests/tests.php
+Tests/http/
