@@ -17,6 +17,15 @@ class userAdapter {
         $this->db = $db;
     }
 
+    public function isExists() {
+        $query = "SELECT id FROM users WHERE user_id = :user_id";
+        $params = [":user_id" => $this->user_id];
+
+        $exec = $this->db->fetchOne($query, $params);
+
+        return ($exec === null) ? false : true;
+    }
+
     public function getUserByID() {
         $query = "SELECT * FROM users WHERE user_id = :user_id AND is_dropped = 0";
         $params = [":user_id" => $this->user_id];

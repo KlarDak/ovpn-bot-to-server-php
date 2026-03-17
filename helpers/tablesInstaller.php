@@ -10,7 +10,7 @@ echo "Creating 'users' table...";
 $connector->execute(
     "CREATE TABLE `users` (
     `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
-    `user_id` text NOT NULL COMMENT 'Telegram User ID',
+    `user_id` VARCHAR(64) NOT NULL COMMENT 'Telegram User ID',
     `username` text NOT NULL COMMENT 'Telegram Username',
     `configs_count` int DEFAULT '0' COMMENT 'Number of Configurations',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Timestamp',

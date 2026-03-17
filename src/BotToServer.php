@@ -23,7 +23,7 @@ class BotToServer
         return $this->user_id;
     }
 
-    public function users(int $user_id) : Adapters\userAdapter
+    public function user(int $user_id) : Adapters\userAdapter
     {
         return new Adapters\userAdapter($this->databaseConnector, $user_id ?? $this->user_id);
     }
