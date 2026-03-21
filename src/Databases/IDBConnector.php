@@ -11,4 +11,8 @@ interface IDBConnector
     public function fetchAll(string $query, array $params = []): array;
 
     public function lastInsertId(): string;
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $serialized_data): void;
 }

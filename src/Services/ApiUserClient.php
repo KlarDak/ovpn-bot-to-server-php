@@ -8,12 +8,13 @@ use CNS\OvpnBotToServer\Types\Response;
 use CNS\OvpnBotToServer\Utils\JwtGenerator;
 use CNS\OvpnBotToServer\Utils\Utils;
 use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
+use UnexpectedValueException;
 
 class ApiUserClient {
     public Client $client;
     public array $endpoint = [
         "config" => "/v2.0/users/config",
-        // "bot" => "/v2.0/bot/"
         "download" => "/v2.0/configs/download"
     ];
     public string $server_id;
@@ -113,5 +114,30 @@ class ApiUserClient {
                 "Authorization" => "Bearer $token"
             ]
         ];
+    }
+
+    // ???????
+    
+    public function __serialize(): array
+    {
+        return [
+            "endpoints" => $this->endpoint
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        if (empty($data["endpoints"]) || !is_array($data["endpoints"])) {
+            throw new UnexpectedValueException("Error with arguments in unserialize method");
+        }
+
+        $this->endpoint = $data["endpoints"];
+        $required_methods = ["config", "download"];
+        
+        foreach ($required_methods as $key) {
+            if (!array_key_exists($key, $this->endpoint)) {
+                throw new InvalidArgumentException("Missing endpoint argument was excepted: $key");
+            }
+        }
     }
 }

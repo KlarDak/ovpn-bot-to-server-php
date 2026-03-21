@@ -6,6 +6,7 @@ class User {
     public int $id;
     public string $user_id;
     public string $username;
+    public string $language;
     public int $configs_count;
     public string $created_at;
     public string|null $expired_at;
@@ -18,6 +19,7 @@ class User {
         $this->id = $userData['id'];
         $this->user_id = $userData['user_id'];
         $this->username = $userData['username'];
+        $this->language = $userData['language'];
         $this->configs_count = $userData['configs_count'];
         $this->created_at = $userData['created_at'];
         $this->expired_at = $userData['expired_at'];

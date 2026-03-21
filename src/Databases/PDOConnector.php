@@ -2,14 +2,18 @@
 
 namespace CNS\OvpnBotToServer\Databases;
 use CNS\OvpnBotToServer\Databases\IDBConnector;
+use InvalidArgumentException;
+use UnexpectedValueException;
 
 class PDOConnector implements IDBConnector{
     private \PDO $pdo;
+    private array $db_connector_params;
 
     function __construct(string $hostname, string $port, string $username, string $password, string $dbname)
     {
-        $this->pdo = new \PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->db_connector_params = get_defined_vars();
+        
+        $this->getConnect();
     }
 
     public function execute(string $query, array $params = []): bool
@@ -36,5 +40,37 @@ class PDOConnector implements IDBConnector{
     public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
+    }
+
+    public function getConnect(): void
+    {
+        $host = "mysql:host=".$this->db_connector_params["hostname"].";port=".$this->db_connector_params["port"].";dbname=".$this->db_connector_params["dbname"];
+        $this->pdo = new \PDO($host, $this->db_connector_params["username"], $this->db_connector_params["password"]);
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    }
+
+    public function __serialize() {
+        return [
+            "connect" => $this->db_connector_params
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        if (!empty($data["connect"]) || !is_array($data["connect"])) {
+            throw new UnexpectedValueException("Invalid or missing 'connect' data in unserialized data.");
+        }
+        
+        $this->db_connector_params = $data["connect"];
+        
+        $required_field = ["hostname", "port", "dbname", "username", "password"];
+
+        foreach ($required_field as $key) {
+            if (!array_key_exists($key, $this->db_connector_params)) {
+                throw new InvalidArgumentException("Missing connection argument: $key");
+            }
+        }
+
+        $this->getConnect();
     }
 }

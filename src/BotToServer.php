@@ -8,6 +8,7 @@ class BotToServer
 {
     private IDBConnector $databaseConnector;
     private int $user_id;
+    private array $db_connector_params = [];
 
     function __construct(IDBConnector $databaseConnector, ?int $user_id = null)
     {

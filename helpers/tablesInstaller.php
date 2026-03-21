@@ -12,6 +12,7 @@ $connector->execute(
     `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
     `user_id` VARCHAR(64) NOT NULL COMMENT 'Telegram User ID',
     `username` text NOT NULL COMMENT 'Telegram Username',
+    'language' text NOT NULL COMMENT 'Language of user',
     `configs_count` int DEFAULT '0' COMMENT 'Number of Configurations',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Timestamp',
     `expired_at` datetime DEFAULT NULL COMMENT 'Expiration Timestamp',

@@ -77,6 +77,18 @@ class userAdapter {
         }
     }
 
+    public function updateLanguage(string $language) : bool {
+        try {
+            $query = "UPDATE users SET language = :language WHERE user_id = :user_id";
+            $params = [":language" => $language, ":user_id" => $this->user_id];
+
+            return $this->db->execute($query, $params);
+        }
+        catch (UserException $error) {
+            return false;
+        }
+    }
+
     public function updateConfigsCount(int $configs_count) : bool {
         try {
             $query = "UPDATE users SET configs_count = configs_count + :cc WHERE user_id = :user_id";
