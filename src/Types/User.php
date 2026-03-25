@@ -3,15 +3,74 @@
 namespace CNS\OvpnBotToServer\Types;
 
 class User {
+    /**
+     * Record ID
+     * 
+     * @var int
+     */
     public int $id;
+    
+    /**
+     * UserID of user in Telegram
+     * 
+     * @var string
+     */
     public string $user_id;
+
+    /**
+     * Username of user in Telegram
+     * 
+     * @var string
+     */
     public string $username;
+
+    /**
+     * Language of user
+     * 
+     * @var string
+     */
     public string $language;
+
+    /**
+     * User's config count
+     * 
+     * @var int
+     */
     public int $configs_count;
+
+    /**
+     * Date creation of user
+     * 
+     * @var string
+     */
     public string $created_at;
+
+    /**
+     * Date expiration of user
+     * 
+     * @var string|null
+     */
     public string|null $expired_at;
+
+    /**
+     * Last payment of user
+     * 
+     * @var string|null
+     */
     public string|null $last_payment_at;
+
+    /**
+     * Is user active
+     * 
+     * @var bool
+     */
     public bool $is_active;
+
+    /**
+     * Account deactivation date
+     * 
+     * @var string|null
+     */
     public string|null $disabled_at;
 
     function __construct(array $userData)

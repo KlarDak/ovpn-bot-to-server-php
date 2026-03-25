@@ -3,8 +3,25 @@
 namespace CNS\OvpnBotToServer\Types;
 
 class Response {
+    /**
+     * HTTP response code
+     * 
+     * @var int
+     */
     public int $code;
+
+    /**
+     * Message of response
+     * 
+     * @var string
+     */
     public string $message;
+
+    /**
+     * Data of response
+     * 
+     * @var array|null
+     */
     public array|null $data;
 
     function __construct(array $responseData)

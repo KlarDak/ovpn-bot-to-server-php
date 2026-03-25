@@ -9,8 +9,21 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class JwtGenerator {
+    /**
+     * Token payload validation fields
+     * 
+     * @var array
+     */
     public static array $payloadFields = ["sub", "aud", "iat", "exp", "role", "type"];
     
+    /**
+     * Decode of token
+     * 
+     * @param string $token Authorization token
+     * @param string $server_id Server identify
+     * @return object|false
+     * @throws TokenException
+     */
     public static function decodeToken(string $token, string $server_id) : object|false {
         try {
             $server_key = Env::getSecretKeyByID($server_id);
@@ -24,7 +37,17 @@ class JwtGenerator {
         }
     } 
 
-    public static function createToken(string $server_id, int $exp, string $type, string $role) {
+    /**
+     * Create token function
+     * 
+     * @param string $server_id Server idenfity
+     * @param int $exp Token expiration date
+     * @param string $type Type of query
+     * @param string $role Sender role
+     * @return string|false
+     * @throws TokeException
+     */
+    public static function createToken(string $server_id, int $exp, string $type, string $role): string|false {
         try {
             if (time() > $exp) {
                 throw new TokenException("Error: the exp-field must be greater than TIME()");
@@ -39,11 +62,27 @@ class JwtGenerator {
         }
     }
 
-    public static function encodeToken(string $secret_key, array $payload) {
+    /**
+     * Encoding token
+     * 
+     * @param string $secket_key Secret key of recipient server
+     * @param array $payload Payload of toke
+     * @return string
+     */
+    public static function encodeToken(string $secret_key, array $payload): string {
         return JWT::encode($payload, $secret_key, "HS256");
     }
 
-    public static function payloadGenerator(string $aud_id, int $exp, string $type, string $role) {
+    /**
+     * Payload generator
+     * 
+     * @param string $aud_id Index of recipient server
+     * @param int $exp Token expiration date
+     * @param string $type Type of query
+     * @param string $role Role of sender
+     * @return array
+     */
+    public static function payloadGenerator(string $aud_id, int $exp, string $type, string $role): array {
         return [
             "sub" => Env::getSubIndex(),
             "aud" => Env::getIndexByID($aud_id),

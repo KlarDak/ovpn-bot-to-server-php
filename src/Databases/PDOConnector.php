@@ -49,19 +49,19 @@ class PDOConnector implements IDBConnector{
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
-    public function __serialize() {
+    public function __serialize(): array {
         return [
-            "connect" => $this->db_connector_params
+            "db_connector_params" => $this->db_connector_params
         ];
     }
 
     public function __unserialize(array $data): void
     {
-        if (!empty($data["connect"]) || !is_array($data["connect"])) {
+        if (!empty($data["db_connector_params"]) || !is_array($data["db_connector_params"])) {
             throw new UnexpectedValueException("Invalid or missing 'connect' data in unserialized data.");
         }
         
-        $this->db_connector_params = $data["connect"];
+        $this->db_connector_params = $data["db_connector_params"];
         
         $required_field = ["hostname", "port", "dbname", "username", "password"];
 

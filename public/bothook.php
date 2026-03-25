@@ -22,8 +22,6 @@
 
     $bot->setRunningMode(WebHook::class);
 
-    
-
     $bot->run();
 
     

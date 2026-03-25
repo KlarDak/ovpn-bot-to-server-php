@@ -2,15 +2,47 @@
 
 namespace CNS\OvpnBotToServer\Types;
 
-/**
- * 
- */
 class Payload {
+    /**
+     * Sender server index
+     * 
+     * @var string
+     */
     public string $sub;
+
+    /**
+     * Recipient server index
+     * 
+     * @var string
+     */
     public string $aud;
+
+    /**
+     * Token creation date
+     * 
+     * @var int
+     */
     public int $iat;
+
+    /**
+     * Token expiration date
+     * 
+     * @var int
+     */
     public int $exp;
+
+    /**
+     * Role of sender
+     * 
+     * @var string
+     */
     public string $role;
+
+    /**
+     * Type of query
+     * 
+     * @var string
+     */
     public string $type;
     
     function __construct(string $payloadData)

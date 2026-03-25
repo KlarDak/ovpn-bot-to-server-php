@@ -4,13 +4,60 @@ namespace CNS\OvpnBotToServer\Types;
 
 class Config
 {
+    /**
+     * Record ID
+     * 
+     * @var int
+     */
     public int $id;
+    
+    /**
+     * UUID of config file
+     * 
+     * @var string
+     */
     public string $uuid;
+    
+    /**
+     * UserID of user in Telegram
+     * 
+     * @var string
+     */
     public string $user_id;
+
+    /**
+     * Type of config file
+     * 
+     * @var string
+     */
     public string $type;
+
+    /**
+     * Server location of config file
+     * 
+     * @var string
+     */
     public string $location;
+
+    /**
+     * Record creation date
+     * 
+     * @var string
+     */
     public string $created_at;
+
+    /**
+     * Status of config file
+     * 
+     * @var bool
+     */
     public bool $status;
+
+    /**
+     * Record blocking date
+     * 
+     * @var string
+     */
     public string $blocked_at;
     // -------------------------
     public bool $is_dropped;

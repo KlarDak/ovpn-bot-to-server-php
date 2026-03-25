@@ -1,18 +1,23 @@
 <?php
 
+require __DIR__ . "/../vendor/autoload.php";
+
 use CNS\OvpnBotToServer\Types\Env;
 use CNS\OvpnBotToServer\Databases\PDOConnector;
+use Dotenv\Dotenv;
+
+Dotenv::createImmutable(__DIR__ . '/../')->load();
 
 $connector = new PDOConnector(Env::getDatabaseKeys()->hostname, Env::getDatabaseKeys()->port, Env::getDatabaseKeys()->username, Env::getDatabaseKeys()->password, Env::getDatabaseKeys()->dbname);
 
 echo "Creating 'users' table...";
 
 $connector->execute(
-    "CREATE TABLE `users` (
+    "CREATE TABLE IF NOT EXISTS `users` (
     `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
     `user_id` VARCHAR(64) NOT NULL COMMENT 'Telegram User ID',
     `username` text NOT NULL COMMENT 'Telegram Username',
-    'language' text NOT NULL COMMENT 'Language of user',
+    `language` text NOT NULL COMMENT 'Language of user',
     `configs_count` int DEFAULT '0' COMMENT 'Number of Configurations',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Timestamp',
     `expired_at` datetime DEFAULT NULL COMMENT 'Expiration Timestamp',
@@ -27,8 +32,8 @@ $connector->execute(
 
 echo "Creating 'configs' table...";
 
-$connector->execute("
-    CREATE TABLE `configs` (
+$connector->execute(
+    "CREATE TABLE IF NOT EXISTS `configs` (
     `id` int NOT NULL AUTO_INCREMENT,
     `uuid` varchar(255) NOT NULL,
     `user_id` varchar(255) NOT NULL,
