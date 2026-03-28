@@ -144,6 +144,23 @@ $db = new PDOConnector($hostname, $port, $username, $password, $dbname);
 $botToServer = new BotToServer($db);
 ```
 
+### BTSStatic
+
+> Доступен для работы с версии **dev-2.3**
+
+Статический варианта класса **BotToServer**. Обладает тем же набором методов, кроме отсутствия ``__construct`` и наличия метода ``setDBConnection($databaseConnector)`` - метода для установки объекта класса подключения к базе данных.
+
+```php
+<?php
+
+use CNS\OvpnBotToServer\BotToServer;
+use CNS\OvpnBotToServer\Databases\PDOConnector;
+
+$db = new PDOConnector($hostname, $port, $username, $password, $dbname);
+
+BTSStatic::setDBConnection($db);
+```
+
 ### Примеры использования
 
 Для получения данных пользователя, используйте метод ``user()`` с ``$user_id`` - User ID пользователя:
@@ -152,6 +169,8 @@ $botToServer = new BotToServer($db);
 use CNS\OvpnBotToServer\BotToServer;
 
 $user = $botToServer->user(1);
+// или
+$user = BTSStatic::user(1);
 
 // Получить username
 print($user->getUserByID()->username);
@@ -166,6 +185,8 @@ print($user->updateUsername("new_username"));
 use CNS\OvpnBotToServer\BotToServer;
 
 $config = $botToServer->config("uuid");
+// или
+$config = BTSStatic::config("uuid");
 
 // Получить имя конфиг-файла
 print($config->getConfig()->config_name);
@@ -181,6 +202,8 @@ use CNS\OvpnBotToServer\BotToServer;
 
 // Обращаемся к RU-серверу, указанному в .env-файле
 $apiServer = $botToServer->apiClient("RU");
+// или
+$apiServer = BTSStatic::apiClient("RU");
 
 // Получить данные конфиг-файла с сервера
 var_dump($apiServer->getConfig("uuid"));
@@ -196,6 +219,8 @@ use CNS\OvpnBotToServer\BotToServer;
 
 // Обращаемся к RU-серверу, указанному в .env-файле
 $configs = $botToServer->configs(1);
+// или
+$configs = BTSStatic::configs(1);
 
 // Обновит данные о блокировке всех конфиг-файлов пользователя
 print($configs->blockConfigsByUserID());

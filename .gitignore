@@ -4,3 +4,4 @@ pja-package.json
 tests/tests.php
 Tests/http/
 .phpunit.result.cache
+Tests/

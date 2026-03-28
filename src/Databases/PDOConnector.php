@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use UnexpectedValueException;
 
 class PDOConnector implements IDBConnector{
-    private \PDO $pdo;
+    public \PDO $pdo;
     private array $db_connector_params;
 
     function __construct(string $hostname, string $port, string $username, string $password, string $dbname)
