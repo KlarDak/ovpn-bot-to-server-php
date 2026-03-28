@@ -44,6 +44,15 @@ class Langs {
         }
     }
 
+    public static function setMisplacedDir(string $dir) : bool {
+        if (is_dir($dir)) {
+            self::$path = $dir;
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Get expression by its key
      * 
