@@ -35,6 +35,7 @@ Utils::timeGenerator(time(), 2);
 |:--:|:--:|:--:|
 |saveOvpnFile()|Сохраняет данные в ``.ovpn``-файл| ``$uuid``, ``$file``|
 |removeOvpnFile()|Удаляет ``.ovpn``-файл|``$uuid``|
+|getOvpnPath()|Получить путь к ``.ovpn``-файлу|``$uuid``|
 |isOvpnFileExists()|Проверяет, существует ли ``.ovpn``-файл|``$uuid``|
 
 ## JwtGenerator

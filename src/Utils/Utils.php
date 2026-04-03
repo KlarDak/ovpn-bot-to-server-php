@@ -40,6 +40,16 @@ class Utils {
     }
 
     /**
+     * Get path to .ovpn-file
+     * 
+     * @param string $uuid UUID identify
+     * @return string
+     */
+    public static function getOvpnPath(string $uuid) : string {
+        return Env::getConfigsDir() . "$uuid.ovpn";
+    }
+
+    /**
      * Check, is .ovpn-file exists
      * 
      * @param string $uuid UUID identify
