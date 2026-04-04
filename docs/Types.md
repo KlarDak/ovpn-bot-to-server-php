@@ -18,6 +18,7 @@
 |last_payment_at|string|Дата последней оплаты услуг|
 |is_active|boolean|Активен ли аккаунт|
 |disabled_at|string|Дата дезактивации аккаунта|
+|is_dropped|bool|Удалён ли аккаунт?|
 
 **Пример:**
 
@@ -40,6 +41,7 @@ print($user->id);
 |created_at|string|Дата создания записи|
 |status|boolean|Статус активности конфиг-файла|
 |blocked_at|string|Дата блокировки конфиг-файла|
+|is_dropped|bool|Удалён ли конфиг-файл?|
 
 **Пример:**
 
