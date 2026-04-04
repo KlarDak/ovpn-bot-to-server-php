@@ -39,6 +39,7 @@ $connector->execute(
     `user_id` varchar(255) NOT NULL,
     `config_name` text,
     `type` text NOT NULL,
+    `location` text NOT NULL,
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `status` tinyint(1) NOT NULL DEFAULT '1',
     `blocked_at` datetime DEFAULT NULL,

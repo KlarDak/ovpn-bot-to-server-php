@@ -56,9 +56,9 @@ class Config
     /**
      * Record blocking date
      * 
-     * @var string
+     * @var string|null
      */
-    public string $blocked_at;
+    public string|null $blocked_at;
     // -------------------------
     public bool $is_dropped;
 
