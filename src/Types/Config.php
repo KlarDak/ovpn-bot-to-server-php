@@ -26,6 +26,13 @@ class Config
     public string $user_id;
 
     /**
+     * Name of config file
+     * 
+     * @var string
+     */
+    public string $config_name;
+
+    /**
      * Type of config file
      * 
      * @var string
@@ -67,6 +74,7 @@ class Config
         $this->id = $configData['id'];
         $this->uuid = $configData['uuid'];
         $this->user_id = $configData['user_id'];
+        $this->config_name = $configData['config_name'];
         $this->type = $configData['type'];
         $this->location = $configData['location'];
         $this->created_at = $configData['created_at'];

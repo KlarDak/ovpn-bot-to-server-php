@@ -36,6 +36,7 @@ print($user->id);
 |ID|int|ID записи|
 |uuid|string|UUID-идентификатор конфиг-файла|
 |user_id|string|User ID аккаунта пользователя в Telegram|
+|config_name|string|Имя конфиг-файла|
 |type|string|Тип конфиг-файла пользователя|
 |location|string|Локация (сервер) конфиг-файла|
 |created_at|string|Дата создания записи|
