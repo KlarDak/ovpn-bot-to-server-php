@@ -31,7 +31,7 @@ class usersAdapter {
      */
     public function getAllUsers() : array {
         try {
-            $query = "SELECT user_id, username FROM users WHERE is_dropped = 0";
+            $query = "SELECT * FROM users WHERE is_dropped = 0";
             $allUsers = $this->dbConnector->fetchAll($query, []);
 
             return array_map(

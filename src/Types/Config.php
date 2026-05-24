@@ -66,7 +66,12 @@ class Config
      * @var string|null
      */
     public string|null $blocked_at;
-    // -------------------------
+    
+    /**
+     * Is config file dropped
+     * 
+     * @var bool
+     */
     public bool $is_dropped;
 
     function __construct(array $configData)
@@ -80,5 +85,6 @@ class Config
         $this->created_at = $configData['created_at'];
         $this->status = $configData['status'];
         $this->blocked_at = $configData['blocked_at'];
+        $this->is_dropped = $configData['is_dropped'];
     }
 }
