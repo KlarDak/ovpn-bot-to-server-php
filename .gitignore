@@ -4,4 +4,6 @@ pja-package.json
 tests/tests.php
 Tests/http/
 .phpunit.result.cache
-Tests/
+Tests/*
+!Tests/ApiCompatibilityTest.php
+!Tests/ApiIntegrationTest.php

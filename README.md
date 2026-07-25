@@ -1,6 +1,6 @@
-# OVPN-bot-to-server-PHP v2.0
+# OVPN-bot-to-server-PHP v2.1.9
 
-Вторая версия библиотеки для связи между Telegram-ботом и сервером OpenVPN.
+PHP-библиотека для связи между Telegram-ботом и OpenVPN Controller API `v2.1.9`.
 
 ![PHP Version](https://img.shields.io/badge/PHP-8.1+-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)

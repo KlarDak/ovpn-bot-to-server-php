@@ -54,7 +54,7 @@ Utils::timeGenerator(time(), 2);
 JwtGenerator::decodeToken($token, $server_id);
 ```
 
-Метод ``createToken($server_id, $exp, $type, $role)`` создаёт JWT-токен и полезную нагрузку для отправки запроса на сервер.
+Метод ``createToken($server_id, $exp, $role)`` создаёт JWT-токен и полезную нагрузку для отправки запроса на сервер.
 
 Возвращает ``string``.
 
@@ -62,11 +62,10 @@ JwtGenerator::decodeToken($token, $server_id);
 |:--:|:--:|
 |$server_id|Идентификатор сервера из связки в файле ``.env``|
 |$exp|Срок действия токена (время истечения действия)|
-|$type|Тип запроса|
-|$role|Тип пользователя-отправителя|
+|$role|Роль отправителя: ``admin``, ``bot``, ``site`` или ``user``|
 
 ```php
-JwtGenerator::createToken($server_id, $exp, $type, $role);
+JwtGenerator::createToken($server_id, $exp, $role);
 ```
 
 Метод ``encodeToken()`` тоже создаёт JWT-токен, однако ему изначально нужно передавать полезную нагрузку. Является более "ручным" вариантом создания токена. 
@@ -87,6 +86,7 @@ JwtGenerator::encodeToke($secret_key, $payload);
 |:--:|:--:|
 |$aud_id|Идентификатор сервера-получателя|
 |$exp|Срок действия токена|
-|$type|Тип запроса|
 |$role|Роль отправителя|
+
+Поле ``type`` удалено из JWT начиная с API v2.1. Токены, создаваемые API-клиентами библиотеки, имеют срок жизни 12 секунд.
 

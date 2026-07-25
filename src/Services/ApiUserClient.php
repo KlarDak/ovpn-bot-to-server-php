@@ -25,8 +25,8 @@ class ApiUserClient {
      * @var array
      */
     public array $endpoint = [
-        "config" => "/v2.0/users/config",
-        "download" => "/v2.0/configs/download"
+        "config" => "/api/config",
+        "download" => "/api/download"
     ];
     /**
      * Server identifier variable
@@ -61,7 +61,7 @@ class ApiUserClient {
     public function getConfig(string $uuid) : Response|false
     {
         try {
-            return $this->queryConfig("get", $this->endpoint["config"] . "/$uuid", "get");
+            return $this->queryConfig("get", $this->endpoint["config"] . "/$uuid");
         }
         catch(ApiException $error) {
             return false;
@@ -78,11 +78,11 @@ class ApiUserClient {
      */
     public function postConfig(string $uuid, int $time, string $type) : Response|false {
         try {
-            if (!in_array($type, ["user", "admin", "unlimit"]) || $time < 0) {
+            if (!in_array($type, ["user", "unblocked", "unlimit"], true) || $time <= 0) {
                 return false;
             }
 
-            return $this->queryConfig("post", $this->endpoint["config"], "create", ["json" => [
+            return $this->queryConfig("post", $this->endpoint["config"], ["json" => [
                 "uuid" => $uuid,
                 "time" => $time,
                 "type" => $type
@@ -103,12 +103,11 @@ class ApiUserClient {
      */
     public function putConfig(string $uuid, int $time, string $type) : Response|false {
         try {
-            if (!in_array($type, ["user", "admin", "unlimit", "trial"]) || $time < 0) {
+            if (!in_array($type, ["user", "unblocked", "unlimit"], true) || $time <= 0) {
                 return false;
             }
 
-            return $this->queryConfig("put", $this->endpoint["config"], "recreate", ["json" => [
-                "uuid" => $uuid,
+            return $this->queryConfig("put", $this->endpoint["config"] . "/$uuid", ["json" => [
                 "time" => $time,
                 "type" => $type
             ]]);
@@ -128,15 +127,23 @@ class ApiUserClient {
      */
     public function patchConfig(string $uuid, ?int $time = null, ?string $type = null) : Response|false {
         try {
-            if (!in_array($type, ["user", "admin", "unlimit", "trial"]) && $time < 0) {
+            $availableTypes = ["user", "unblocked", "unlimit"];
+            if (
+                ($time === null && $type === null)
+                || ($time !== null && $time <= 0)
+                || ($type !== null && !in_array($type, $availableTypes, true))
+            ) {
                 return false;
             }
 
-            return $this->queryConfig("patch", $this->endpoint["config"], "update", ["json" => [
-                "uuid" => $uuid,
+            $data = array_filter([
                 "time" => $time,
                 "type" => $type
-            ]]);
+            ], static fn ($value) => $value !== null);
+
+            return $this->queryConfig("patch", $this->endpoint["config"] . "/$uuid", [
+                "json" => $data
+            ]);
         }
         catch(ApiException $error) {
             return false;
@@ -152,7 +159,7 @@ class ApiUserClient {
      */
     public function deleteConfig(string $uuid) : Response|false {
         try {
-            return $this->queryConfig("delete", $this->endpoint["config"] . "/$uuid", "delete");
+            return $this->queryConfig("delete", $this->endpoint["config"] . "/$uuid");
         }
         catch(ApiException $error) {
             return false;
@@ -170,7 +177,7 @@ class ApiUserClient {
     public function downloadConfig(string $uuid, string $short_link) : bool
     {
         try {
-            $token = JwtGenerator::createToken($this->server_id, time() + 36000, "download", "user");
+            $token = JwtGenerator::createToken($this->server_id, time() + 12, "site");
 
             $getConfig = $this->client->request("get", $this->endpoint["download"] . "/$short_link", [
                 "headers" => [
@@ -198,14 +205,13 @@ class ApiUserClient {
      * 
      * @param string $method HTTP method of query
      * @param string $endpoint Endpoint of query to the server
-     * @param string $type Type of query
-     * @param string $params Parameters in request body
+     * @param array|null $params Parameters in request body
      * @return Response|false
      * @throws GuzzleException
      */
-    public function queryConfig(string $method, string $endpoint, string $type, ?array $params = null, ?string $role = "user") : Response|false {
+    public function queryConfig(string $method, string $endpoint, ?array $params = null) : Response|false {
         try {
-            $token = JwtGenerator::createToken($this->server_id, time() + 36000, $type, $role);
+            $token = JwtGenerator::createToken($this->server_id, time() + 12, "bot");
             $getResult = $this->client->request($method, $endpoint, array_merge($this->mergeHeaders($token), (is_array($params)) ? $params : []));
             $decoded_data = json_decode($getResult->getBody()->getContents(), true);
             return ($decoded_data == null) ? false : new Response($decoded_data);

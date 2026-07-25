@@ -31,6 +31,8 @@ class ApiCronClient {
      */
     function __construct(string $server_id)
     {
+        $this->server_id = $server_id;
+
         $this->client = new Client([
             "base_uri" => Env::getAddressByID($server_id),
             "timeout" => 5.0,
@@ -49,7 +51,7 @@ class ApiCronClient {
         try {
             $banUser = $this->queryConfig("ban", $uuid);
 
-            return ($banUser->code === 200) ? true : false;
+            return $banUser !== false && $banUser->code === 200;
         }
         catch(ApiException $error) {
             return false;
@@ -67,9 +69,43 @@ class ApiCronClient {
         try {
             $pardonUser = $this->queryConfig("pardon", $uuid);
 
-            return ($pardonUser->code === 200) ? true : false;
+            return $pardonUser !== false && $pardonUser->code === 200;
         }
         catch(ApiException $error) {
+            return false;
+        }
+    }
+
+    /**
+     * Disconnect user from the OpenVPN server
+     *
+     * @param string $uuid UUID identifier of config file
+     * @return bool
+     */
+    public function kickUser(string $uuid) : bool {
+        $kickUser = $this->queryConfig("kick", $uuid);
+
+        return $kickUser !== false && $kickUser->code === 200;
+    }
+
+    /**
+     * Get users whose status is active
+     *
+     * @return Response|false
+     */
+    public function getActiveUsers() : Response|false {
+        try {
+            $token = JwtGenerator::createToken($this->server_id, time() + 12, "admin");
+            $getResult = $this->client->request(
+                "get",
+                "/api/active/list",
+                $this->mergeHeaders($token)
+            );
+            $decodedData = json_decode($getResult->getBody()->getContents(), true);
+
+            return ($decodedData === null) ? false : new Response($decodedData);
+        }
+        catch (GuzzleException $error) {
             return false;
         }
     }
@@ -84,10 +120,11 @@ class ApiCronClient {
      */
     public function queryConfig(string $endpoint, string $uuid) : Response|false {
         try {
-            $token = JwtGenerator::createToken($this->server_id, time() + 36000, "active", "bot");
-            $getResult = $this->client->request("post", "/v2.0/bot/active/$endpoint", array_merge($this->mergeHeaders($token), [
-                "uuid" => $uuid
-            ]));
+            $token = JwtGenerator::createToken($this->server_id, time() + 12, "admin");
+            $getResult = $this->client->request("post", "/api/active/$endpoint", array_merge(
+                $this->mergeHeaders($token),
+                ["json" => ["uuid" => $uuid]]
+            ));
             $decoded_data = json_decode($getResult->getBody()->getContents(), true);
             return ($decoded_data === null) ? false : new Response($decoded_data);
         }

@@ -14,7 +14,7 @@ class JwtGenerator {
      * 
      * @var array
      */
-    public static array $payloadFields = ["sub", "aud", "iat", "exp", "role", "type"];
+    public static array $payloadFields = ["sub", "aud", "iat", "exp", "role"];
     
     /**
      * Decode of token
@@ -42,18 +42,21 @@ class JwtGenerator {
      * 
      * @param string $server_id Server idenfity
      * @param int $exp Token expiration date
-     * @param string $type Type of query
      * @param string $role Sender role
      * @return string|false
-     * @throws TokeException
+     * @throws TokenException
      */
-    public static function createToken(string $server_id, int $exp, string $type, string $role): string|false {
+    public static function createToken(string $server_id, int $exp, string $role = "bot"): string|false {
         try {
             if (time() > $exp) {
                 throw new TokenException("Error: the exp-field must be greater than TIME()");
             }
 
-            $payload = self::payloadGenerator($server_id, $exp, $type, $role);
+            if (!in_array($role, ["admin", "bot", "site", "user"], true)) {
+                throw new TokenException("Error: unsupported token role");
+            }
+
+            $payload = self::payloadGenerator($server_id, $exp, $role);
             $secret_key = Env::getSecretKeyByID($server_id);
             return self::encodeToken($secret_key, $payload);
         }
@@ -65,7 +68,7 @@ class JwtGenerator {
     /**
      * Encoding token
      * 
-     * @param string $secket_key Secret key of recipient server
+     * @param string $secret_key Secret key of recipient server
      * @param array $payload Payload of toke
      * @return string
      */
@@ -78,17 +81,15 @@ class JwtGenerator {
      * 
      * @param string $aud_id Index of recipient server
      * @param int $exp Token expiration date
-     * @param string $type Type of query
-     * @param string $role Role of sender
+     * @param string $role Sender role
      * @return array
      */
-    public static function payloadGenerator(string $aud_id, int $exp, string $type, string $role): array {
+    public static function payloadGenerator(string $aud_id, int $exp, string $role = "bot"): array {
         return [
             "sub" => Env::getSubIndex(),
             "aud" => Env::getIndexByID($aud_id),
             "iat" => time(),
             "exp" => $exp,
-            "type" => $type,
             "role" => $role
         ];
     }

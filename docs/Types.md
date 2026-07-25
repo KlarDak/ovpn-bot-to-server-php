@@ -79,7 +79,6 @@ print($response->code);
 |iat|int|Дата создания|
 |exp|int|Срок истечения|
 |role|string|Роль отправителя|
-|type|string|Тип запроса|
 
 **Пример:**
 

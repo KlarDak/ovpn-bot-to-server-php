@@ -38,20 +38,12 @@ class Payload {
      */
     public string $role;
 
-    /**
-     * Type of query
-     * 
-     * @var string
-     */
-    public string $type;
-    
-    function __construct(string $payloadData)
+    function __construct(array $payloadData)
     {
         $this->sub = $payloadData["sub"];
         $this->aud = $payloadData["aud"];
         $this->iat = $payloadData["iat"];
         $this->exp = $payloadData["exp"];
         $this->role = $payloadData["role"];
-        $this->type = $payloadData["type"];
     }
 }

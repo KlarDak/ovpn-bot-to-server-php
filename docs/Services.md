@@ -33,7 +33,7 @@ $apiServer = new ApiUserClient("RU");
 
 1. ``$uuid`` - UUID-идентификатор конфиг-файла.
 2. ``$time`` - время работы конфиг-файла (в секундах).
-3. ``$type`` - тип конфиг-файла (``user``/``admin``/``unlimit``/``trial``).
+3. ``$type`` - тип конфиг-файла (``user``/``unblocked``/``unlimit``).
 4. ``$short_link`` - только для метода ``downloadConfig()``. Короткий идентификатор конфиг-файла.
 
 Полная таблица типичных методов:
@@ -50,16 +50,14 @@ $apiServer = new ApiUserClient("RU");
 Отдельно, метод ``queryConfig()`` позволяет выполнять прямые запросы к любым ``endpoint`` сервера с любым указанным методом и любыми параметрами.
 
 ```php
-$apiServer->queryConfig($method, $endpoint, $type, $params, $role);
+$apiServer->queryConfig($method, $endpoint, $params);
 ```
 
 где:
 
 1. ``$method`` - HTTP-метод запроса.
 2. ``$endpoint`` - эндпоинт назначения.
-3. ``$type`` - тип пользователя-отправителя.
-4. ``$params`` - параметры запроса.
-5. ``$role`` - роль пользователя отправителя.
+3. ``$params`` - необязательные параметры запроса в формате Guzzle.
 
 > На момент версии ``dev-2.1`` не рекомендуется к использованию по причине нецелесообразности.
 
@@ -75,7 +73,7 @@ $apiCronClient = $botToServer->apiCronClient($server_id);
 $apiCronClient = new ApiCronClient($server_id);
 ```
 
-Доступны два метода:
+Доступны четыре метода:
 
 ``banUser($uuid)`` - блокировка конфиг-файла пользователя с указанным ``$uuid`` - идентификатором конфиг-файла. Возвращает ``boolean``.
 
@@ -89,5 +87,19 @@ $apiCronClient->banUser($uuid);
 $apiCronClient->pardonUser($uuid);
 ```
 
-> Актуально на версию **dev-2.1**. В будущих версиях класс будет сильно изменён и дополнен.
+``kickUser($uuid)`` - принудительное отключение конфиг-файла от OpenVPN-сервера. Возвращает ``boolean``.
+
+```php
+$apiCronClient->kickUser($uuid);
+```
+
+``getActiveUsers()`` - получение списка записей со статусом ``active``. Возвращает объект ``Response`` или ``false``.
+
+```php
+$activeUsers = $apiCronClient->getActiveUsers();
+```
+
+Класс использует актуальные эндпоинты ``/api/active/ban``, ``/api/active/pardon``, ``/api/active/kick`` и ``/api/active/list``.
+
+> Актуально для OpenVPN Controller API **v2.1.9**.
 
