@@ -187,7 +187,7 @@ class ApiUserClient {
                 ]
             ]);
 
-            if ($getConfig->getStatusCode() !== 200) {
+            if (!in_array($getConfig->getStatusCode(), [200, 201, 204], true)) {
                 return false;
             }
 
