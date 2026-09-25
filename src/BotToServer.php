@@ -49,7 +49,7 @@ class BotToServer
      * Get object of class usersAdapter
      * 
      * @param int $user_id UserID of user
-     * @return usersAdapter
+     * @return Adapters\userAdapter
      */
     public function user(int $user_id) : Adapters\userAdapter
     {
@@ -60,7 +60,7 @@ class BotToServer
      * Get object of class configAdapter
      * 
      * @param string $uuid UUID identifier
-     * @return configAdapter
+     * @return Adapters\configAdapter
      */
     public function config(string $uuid) : Adapters\configAdapter 
     {
@@ -71,7 +71,7 @@ class BotToServer
      * Get object of class configAdapter
      * 
      * @param int $user_id UserID of user
-     * @return configAdapter
+     * @return Adapters\configsAdapter
      */
     public function configs(int $user_id) : Adapters\configsAdapter
     {
@@ -82,7 +82,7 @@ class BotToServer
      * Get object of class ApiUserClient
      * 
      * @param string $server_id Index of selected server
-     * @return ApiUserClient
+     * @return Services\ApiUserClient
      */
     public function apiClient(string $server_id) : Services\ApiUserClient
     {
@@ -92,7 +92,7 @@ class BotToServer
     /**
      * Get object of class usersAdapter
      * 
-     * @return usersAdapter
+     * @return Adapters\usersAdapter
      */
     public function usersClient() : Adapters\usersAdapter 
     {
@@ -103,10 +103,15 @@ class BotToServer
      * Get object of class apiCronClient
      * 
      * @param string $server_id Index of selected server
-     * @return ApiCronClient
+     * @return Services\ApiCronClient
      */
     public function apiCronClient(string $server_id) : Services\ApiCronClient
     {
         return new Services\ApiCronClient($server_id);
+    }
+
+    public function subsClient() : Services\SubsClient
+    {
+        return new Services\SubsClient($this->databaseConnector);
     }
 }

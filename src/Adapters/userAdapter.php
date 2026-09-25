@@ -60,7 +60,7 @@ class userAdapter {
      * @return User
      * @throws UserException
      */
-    public function getUserByID() {
+    public function getUserByID() : User|false {
         try {
             $query = "SELECT * FROM users WHERE user_id = :user_id AND is_dropped = 0";
             $params = [":user_id" => $this->user_id];

@@ -1,22 +1,22 @@
 <?php
 
-namespace KSD\OvpnBotToServer\Services;
+namespace CNS\OvpnBotToServer\Services;
 
 use CNS\OvpnBotToServer\Databases\IDBConnector;
 use CNS\OvpnBotToServer\Types\SubsResponse;
 
 class SubsClient {
-    private static IDBConnector $db;
-    public static function setDB(IDBConnector $db) {
-        self::$db = $db;
+    private IDBConnector $db;
+    function __construct(IDBConnector $db) {
+        $this->db = $db;
     }
 
-    public static function createSubs(string $uuid, string $server, string $shortlink) : bool {
+    public function createSubs(string $uuid, string $server, string $shortlink) : bool {
         if (empty($uuid) || empty($server) || empty($shortlink)) {
             return false;
         }
 
-        $exec = self::$db->fetchOne("INSERT INTO subs (sub_uuid, sub_link, sub_server) VALUES (:uuid, :link, :server)", [
+        $exec = $this->db->fetchOne("INSERT INTO subs (sub_uuid, sub_link, sub_server) VALUES (:uuid, :link, :server)", [
             ":uuid" => $uuid,
             ":link" => $shortlink,
             ":server" => $server
@@ -24,8 +24,8 @@ class SubsClient {
 
         return $exec !== false;
     }
-    public static function getSubs(string $uuid) : SubsResponse {
-        $data = self::$db->fetchOne("SELECT * FROM subs WHERE sub_uuid = :uuid", [
+    public function getSubs(string $uuid) : SubsResponse {
+        $data = $this->db->fetchOne("SELECT * FROM subs WHERE sub_uuid = :uuid", [
             ":uuid" => $uuid
         ]);
 
@@ -35,12 +35,12 @@ class SubsClient {
 
         return new SubsResponse($data);
     }
-    public static function deleteSubs(string $uuid) : bool {
+    public function deleteSubs(string $uuid) : bool {
         if (empty($uuid)) {
             return false;
         }
 
-        $exec = self::$db->fetchOne("DELETE FROM subs WHERE sub_uuid = :uuid", [
+        $exec = $this->db->fetchOne("DELETE FROM subs WHERE sub_uuid = :uuid", [
             ":uuid" => $uuid
         ]);
 
