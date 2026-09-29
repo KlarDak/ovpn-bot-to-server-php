@@ -1,89 +1,35 @@
 <?php
 
-namespace CNS\OvpnBotToServer\Types;
+namespace CNS\BotToServer\Types;
 
-class User {
-    /**
-     * Record ID
-     * 
-     * @var int
-     */
+final class User {
     public int $id;
-    
-    /**
-     * UserID of user in Telegram
-     * 
-     * @var string
-     */
-    public string $user_id;
-
-    /**
-     * Username of user in Telegram
-     * 
-     * @var string
-     */
-    public string $username;
-
-    /**
-     * Language of user
-     * 
-     * @var string
-     */
+    public ?int $telegram_id = null;
+    public ?string $email = null;
+    public ?string $username = null;
     public string $language;
 
-    /**
-     * User's config count
-     * 
-     * @var int
-     */
-    public int $configs_count;
-
-    /**
-     * Date creation of user
-     * 
-     * @var string
-     */
-    public string $created_at;
-
-    /**
-     * Date expiration of user
-     * 
-     * @var string|null
-     */
-    public string|null $expired_at;
-
-    /**
-     * Last payment of user
-     * 
-     * @var string|null
-     */
-    public string|null $last_payment_at;
-
-    /**
-     * Is user active
-     * 
-     * @var bool
-     */
-    public bool $is_active;
-
-    /**
-     * Account deactivation date
-     * 
-     * @var string|null
-     */
-    public string|null $disabled_at;
+    public \DateTimeImmutable $created_at;
+    public ?\DateTimeImmutable $last_activity_at = null;
+    public ?\DateTimeImmutable $expired_at = null;
+    public ?\DateTimeImmutable $last_payment_at = null;
+    public bool $is_active = true;
+    public ?\DateTimeImmutable $disabled_at = null;
+    public bool $is_dropped = false;
 
     function __construct(array $userData)
     {
-        $this->id = $userData['id'];
-        $this->user_id = $userData['user_id'];
-        $this->username = $userData['username'];
-        $this->language = $userData['language'];
-        $this->configs_count = $userData['configs_count'];
-        $this->created_at = $userData['created_at'];
-        $this->expired_at = $userData['expired_at'];
-        $this->last_payment_at = $userData['last_payment_at'];
-        $this->is_active = $userData['is_active'];
-        $this->disabled_at = $userData['disabled_at'];
+        $this->id = (int) $userData['id']; 
+        $this->telegram_id = isset($userData['telegram_id']) ? (int) $userData['telegram_id'] : null;
+        $this->email = isset($userData['email']) ? (string) $userData['email'] : null;
+        $this->username = isset($userData['username']) ? (string) $userData['username'] : null;
+        $this->language = (string) $userData['language'];
+        $this->created_at = new \DateTimeImmutable($userData['created_at']);
+        $this->last_activity_at = isset($userData['last_activity_at']) ? new \DateTimeImmutable($userData['last_activity_at']) : null;
+        $this->expired_at = isset($userData['expired_at']) ? new \DateTimeImmutable($userData['expired_at']) : null;
+        $this->last_payment_at = isset($userData['last_payment_at']) ? new \DateTimeImmutable($userData['last_payment_at']) : null;
+        $this->is_active = (bool) $userData['is_active'];
+        $this->disabled_at = isset($userData['disabled_at']) ? new \DateTimeImmutable($userData['disabled_at']) : null;
+        $this->is_dropped = (bool) $userData['is_dropped']; 
     }
 }

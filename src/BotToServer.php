@@ -1,117 +1,33 @@
 <?php
 
-namespace CNS\OvpnBotToServer;
+namespace CNS\BotToServer;
 
-use CNS\OvpnBotToServer\Databases\IDBConnector;
+use CNS\BotToServer\Database\IDBConnector;
 
-class BotToServer
-{
-    /**
-     * Database object variable
-     * 
-     * @var IDBConnector
-     */
-    private IDBConnector $databaseConnector;
-    /**
-     * UserID of user in Telegram
-     * 
-     * @var int
-     */
-    private int $user_id;
-
-    function __construct(IDBConnector $databaseConnector, ?int $user_id = null)
+class BotToServer {
+    private IDBConnector $dbConnector;
+    function __construct(IDBConnector $dbConnector)
     {
-        $this->databaseConnector = $databaseConnector;
-        $this->user_id = $user_id ?? 0;
+        $this->dbConnector = $dbConnector;
     }
 
-    /**
-     * Set new userID
-     * 
-     * @param int $user_id UserID of user in Telegram
-     * 
-     * @return void
-     */
-    public function setUserID(int $user_id) : void {
-        $this->user_id = $user_id;
+    public function user(int $user_id) {
+        return new Resources\UserResource($this->dbConnector, $user_id);
     }
 
-    /**
-     * Getter of UserID
-     * 
-     * @return int
-     */
-    public function getUserID() : int {
-        return $this->user_id;
+    public function users() {
+        return new Resources\UsersResource($this->dbConnector);
     }
 
-    /**
-     * Get object of class usersAdapter
-     * 
-     * @param int $user_id UserID of user
-     * @return Adapters\userAdapter
-     */
-    public function user(int $user_id) : Adapters\userAdapter
-    {
-        return new Adapters\userAdapter($this->databaseConnector, $user_id ?? $this->user_id);
+    public function access(string $uuid) {
+        return new Resources\AccessResource($this->dbConnector, $uuid);
     }
 
-    /**
-     * Get object of class configAdapter
-     * 
-     * @param string $uuid UUID identifier
-     * @return Adapters\configAdapter
-     */
-    public function config(string $uuid) : Adapters\configAdapter 
-    {
-        return new Adapters\configAdapter($this->databaseConnector, $uuid);
+    public function accesses(int $user_id) {
+        return new Resources\AccessesResource($this->dbConnector, $user_id);
     }
 
-    /**
-     * Get object of class configAdapter
-     * 
-     * @param int $user_id UserID of user
-     * @return Adapters\configsAdapter
-     */
-    public function configs(int $user_id) : Adapters\configsAdapter
-    {
-        return new Adapters\configsAdapter($this->databaseConnector, $user_id);
-    }
-
-    /**
-     * Get object of class ApiUserClient
-     * 
-     * @param string $server_id Index of selected server
-     * @return Services\ApiUserClient
-     */
-    public function apiClient(string $server_id) : Services\ApiUserClient
-    {
-        return new Services\ApiUserClient($server_id);
-    }
-
-    /**
-     * Get object of class usersAdapter
-     * 
-     * @return Adapters\usersAdapter
-     */
-    public function usersClient() : Adapters\usersAdapter 
-    {
-        return new Adapters\usersAdapter($this->databaseConnector);
-    }
-
-    /**
-     * Get object of class apiCronClient
-     * 
-     * @param string $server_id Index of selected server
-     * @return Services\ApiCronClient
-     */
-    public function apiCronClient(string $server_id) : Services\ApiCronClient
-    {
-        return new Services\ApiCronClient($server_id);
-    }
-
-    public function subsClient() : Services\SubsClient
-    {
-        return new Services\SubsClient($this->databaseConnector);
+    public function server(string $server_name, string $vpn_type) {
+        return new Resources\ServerResource($this->dbConnector, $server_name, $vpn_type);
     }
 }
