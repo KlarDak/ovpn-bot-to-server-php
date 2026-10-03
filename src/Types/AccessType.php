@@ -2,7 +2,7 @@
 
 namespace CNS\BotToServer\Types;
 
-enum UserType: string {
+enum AccessType: string {
     case TELEGRAM = 'telegram_id';
     case EMAIL = 'email';
 }

@@ -2,9 +2,9 @@
 
 namespace CNS\BotToServer\Exceptions;
 
-final class UserNotFoundException extends \Exception {
-    public function __construct(int $user_id)
+final class UserAlreadyExistsException extends \Exception {
+    public function __construct(string $identifier)
     {
-        parent::__construct("User with ID $user_id not found.");
+        parent::__construct("User with identifier {$identifier} already exists.");
     }
 }

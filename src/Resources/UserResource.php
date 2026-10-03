@@ -3,20 +3,21 @@
 namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
+use CNS\BotToServer\Exceptions\UserAlreadyExistsException;
 use CNS\BotToServer\Exceptions\UserNotFoundException;
 use CNS\BotToServer\Types\User;
-use CNS\BotToServer\Types\UserType;
+use CNS\BotToServer\Types\AccessType;
 
 class UserResource {
     private IDBConnector $dbConnector;
     private int $id;
-    function __construct(IDBConnector $dbConnector, int|string $identifier, UserType $userType)
+    function __construct(IDBConnector $dbConnector, int|string $identifier, AccessType $accessType)
     {
         $this->dbConnector = $dbConnector;
-        $this->id = $this->setIdByIdentifier($identifier, $userType);
+        $this->id = $this->setIdByIdentifier($identifier, $accessType);
     }
 
-    public function exist() : bool {
+    public function exists() : bool {
         return $this->id !== 0;
     }
 
@@ -28,7 +29,11 @@ class UserResource {
         return $result ? new User($result) : throw new UserNotFoundException("User with ID {$this->id} not found.");
     }
 
-    public function create(UserType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
+    public function create(AccessType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
+        if ($this->exists()) {
+            throw new UserAlreadyExistsException($identifier);
+        }
+    
         $query = "INSERT INTO users ($userType->value, language, username) VALUES (:identifier, :language, :username)";
         $params = [
             ':identifier' => $identifier,
@@ -93,26 +98,26 @@ class UserResource {
         return $this->dbConnector->execute($query, $params);
     }
 
-    public function block() {
+    public function block() : bool {
         $query = "UPDATE users SET is_active = 0 AND disabled_at = NOW() WHERE id = :id AND is_dropped = 0";
         $params = [':id' => $this->id];
         return $this->dbConnector->execute($query, $params);
     }
 
-    public function unblock() {
+    public function unblock() : bool {
         $query = "UPDATE users SET is_active = 1 AND disabled_at = NULL WHERE id = :id AND is_dropped = 0";
         $params = [':id' => $this->id];
         return $this->dbConnector->execute($query, $params);
     }
 
-    public function drop() {
+    public function drop() : bool {
         $query = "UPDATE users SET is_active = 0, disabled_at = NOW(), is_dropped = 1 WHERE id = :id";
         $params = [':id' => $this->id];
         return $this->dbConnector->execute($query, $params);
     }
 
-    private function setIdByIdentifier(int|string $identifier, UserType $userType) {
-        $query = "SELECT id FROM users WHERE $userType->value = :identifier LIMIT 1";
+    private function setIdByIdentifier(int|string $identifier, AccessType $accessType) {
+        $query = "SELECT id FROM users WHERE $accessType->value = :identifier LIMIT 1";
 
         $params = [':identifier' => $identifier];
         $result = $this->dbConnector->fetchOne($query, $params);

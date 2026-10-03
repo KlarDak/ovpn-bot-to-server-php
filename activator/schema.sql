@@ -1,3 +1,5 @@
+CREATE DATABASE 'unlimitdb';
+
 CREATE TABLE `accesses` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Internal access ID',
   `user_id` int NOT NULL COMMENT 'ID of the user who owns the access',
