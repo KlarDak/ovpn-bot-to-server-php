@@ -6,7 +6,6 @@ use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Exceptions\AccessNotFoundException;
 use CNS\BotToServer\Types\Access;
 use CNS\BotToServer\Types\AccessType;
-use CNS\BotToServer\Types\VPNType;
 
 class AccessResource {
     private IDBConnector $dbConnector;
@@ -31,12 +30,12 @@ class AccessResource {
         return $result ? new Access($result) : throw new AccessNotFoundException($this->uuid);
     }
 
-    public function create(int $userId, VPNType $VPNType, int $server_id, ?string $name = null) : bool {
+    public function create(int $userId, AccessType $AccessType, int $server_id, ?string $name = null) : bool {
         $query = "INSERT INTO accesses (user_id, uuid, type, server_id, name) VALUES (:user_id, :uuid, :type, :server_id, :name)";
         $params = [
             ':user_id' => $userId,
             ':uuid' => $this->uuid,
-            ':type' => $VPNType->value,
+            ':type' => $AccessType->value,
             ':server_id' => $server_id,
             ':name' => $name
         ];

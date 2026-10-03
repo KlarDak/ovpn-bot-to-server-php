@@ -7,14 +7,15 @@ use CNS\BotToServer\Exceptions\UserAlreadyExistsException;
 use CNS\BotToServer\Exceptions\UserNotFoundException;
 use CNS\BotToServer\Types\User;
 use CNS\BotToServer\Types\AccessType;
+use CNS\BotToServer\Types\UserType;
 
 class UserResource {
     private IDBConnector $dbConnector;
     private int $id;
-    function __construct(IDBConnector $dbConnector, int|string $identifier, AccessType $accessType)
+    function __construct(IDBConnector $dbConnector, int|string $identifier, UserType $userType)
     {
         $this->dbConnector = $dbConnector;
-        $this->id = $this->setIdByIdentifier($identifier, $accessType);
+        $this->id = $this->setIdByIdentifier($identifier, $userType);
     }
 
     public function exists() : bool {
@@ -29,7 +30,7 @@ class UserResource {
         return $result ? new User($result) : throw new UserNotFoundException("User with ID {$this->id} not found.");
     }
 
-    public function create(AccessType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
+    public function create(UserType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
         if ($this->exists()) {
             throw new UserAlreadyExistsException($identifier);
         }
@@ -116,8 +117,8 @@ class UserResource {
         return $this->dbConnector->execute($query, $params);
     }
 
-    private function setIdByIdentifier(int|string $identifier, AccessType $accessType) {
-        $query = "SELECT id FROM users WHERE $accessType->value = :identifier LIMIT 1";
+    private function setIdByIdentifier(int|string $identifier, UserType $userType) {
+        $query = "SELECT id FROM users WHERE $userType->value = :identifier LIMIT 1";
 
         $params = [':identifier' => $identifier];
         $result = $this->dbConnector->fetchOne($query, $params);
