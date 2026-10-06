@@ -2,7 +2,10 @@
 
 namespace CNS\BotToServer\Node\OpenVPN;
 
+use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
+
 class ActiveContract {
+    function __construct(HttpClientInterface $httpClient, private string $code) {}
     public function getAll() {
 
     }

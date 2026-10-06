@@ -2,12 +2,12 @@
 
 namespace CNS\BotToServer\Node\OpenVPN;
 
-use GuzzleHttp\Client;
+use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
 
 class AccessContract {
-    function __construct(public Client $client, public readonly string $code, public readonly string $subs_url) {}
+    function __construct(private readonly HttpClientInterface $httpClient, private readonly string $code) {}
     public function get(string $uuid) {
-
+        // $this->
     }
 
     public function create(string $uuid, string $type, int $time) {

@@ -7,7 +7,7 @@ final class Access {
     public int $user_id;
     public string $uuid;
     public ?string $name = null;
-    public string $type;
+    public AccessType $type;
     public int $server_id;
     public \DateTimeImmutable $created_at;
     public bool $is_active = true;
@@ -20,7 +20,7 @@ final class Access {
         $this->user_id = (int) $accessData['user_id'];
         $this->uuid = (string) $accessData['uuid'];
         $this->name = isset($accessData['name']) ? (string) $accessData['name'] : null;
-        $this->type = (string) $accessData['type'];
+        $this->type = AccessType::from($accessData['type']);
         $this->server_id = (int) $accessData['server_id'];
         $this->created_at = new \DateTimeImmutable($accessData['created_at']);
         $this->is_active = (bool) $accessData['is_active'];

@@ -17,14 +17,14 @@ class AccessResource {
     }
 
     public function exists() : bool {
-        $query = "SELECT COUNT(*) FROM accesses WHERE uuid = :uuid";
+        $query = "SELECT COUNT(*) FROM accesses WHERE uuid = :uuid AND is_dropped = 0";
         $params = [':uuid' => $this->uuid];
         $count = $this->dbConnector->fetchOne($query, $params)['COUNT(*)'] ?? 0;
         return $count > 0;
     }
 
     public function get() : Access {
-        $query = "SELECT * FROM accesses WHERE uuid = :uuid";
+        $query = "SELECT * FROM accesses WHERE uuid = :uuid AND is_dropped = 0";
         $params = [':uuid' => $this->uuid];
         $result = $this->dbConnector->fetchOne($query, $params);
         return $result ? new Access($result) : throw new AccessNotFoundException($this->uuid);

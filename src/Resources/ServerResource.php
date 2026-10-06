@@ -3,6 +3,8 @@
 namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
+use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
+use CNS\BotToServer\Security\SecretCipher;
 use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\Server;
 
@@ -10,28 +12,39 @@ class ServerResource {
     private IDBConnector $dbConnector;
     private string $server_name;
     private AccessType $access_type;
-    function __construct(IDBConnector $dbConnector, string $server_name, AccessType $accessType)
+    private string|HttpClientInterface $httpClient;
+    function __construct(IDBConnector $dbConnector, string|HttpClientInterface $httpClient, string $server_name, AccessType $accessType)
     {
         $this->dbConnector = $dbConnector;
+        $this->httpClient = $httpClient;
         $this->server_name = $server_name;
         $this->access_type = $accessType;
     }
 
     public function contract() : mixed {
-        $query = "SELECT code, host, port, encrypt_secret_code, subs_url FROM servers WHERE server_name = :server_name AND type = :vpn_type AND is_dropped = 0";
-        $params = [
-            ':server_name' => $this->server_name,
-            ':vpn_type' => $this->access_type->value
-        ];
-        $result = $this->dbConnector->fetchOne($query, $params);
-        
-        if (!$result) {
-            throw new \Exception("Server not found.");
-        }
+        try {
+            $query = "SELECT code, host, port, api_endpoint, encrypt_secret_code, subs_url FROM servers WHERE server_name = :server_name AND type = :vpn_type AND is_dropped = 0";
+            $params = [
+                ':server_name' => $this->server_name,
+                ':vpn_type' => $this->access_type->value
+            ];
+            $result = $this->dbConnector->fetchOne($query, $params);
+            
+            if (!$result) {
+                throw new \Exception("Server not found.");
+            }
 
-        return match ($this->access_type) {
-            AccessType::OPENVPN => new \CNS\BotToServer\Node\OpenVPN\OpenVPNContract($result['code'], $result['host'], (int)$result['port'], $result['encrypt_secret_code'], $result['subs_url']),
-        };
+            if (gettype($this->httpClient) == "string") {
+                $this->httpClient = new $this->httpClient($result['host'], $result['port'], SecretCipher::decrypt($result['encrypt_secret_code'], $_ENV["SECRET_KEY"]), $result["api_endpoint"] ?? "/api");
+            }
+
+            return match ($this->access_type) {
+                AccessType::OPENVPN => new \CNS\BotToServer\Node\OpenVPN\OpenVPNContract($result['code'], $result['subs_url'], $this->httpClient, $this->dbConnector),
+            };
+        }
+        catch (\Exception $e) {
+            throw new \Exception("Error creating contract: " . $e->getMessage());
+        }
     }
 
     public function info() : Server {

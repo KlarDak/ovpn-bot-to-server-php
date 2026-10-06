@@ -10,8 +10,9 @@ class Server {
     public string $name;
     public string $host;
     public int $port;
+    public ?string $api_endpoint = null;
     public string $encrypt_secret_code;
-    public VPNType $type;
+    public AccessType $type;
     public ?string $subs_url = null;
     public DateTimeImmutable $created_at;
     public string $status;
@@ -25,8 +26,9 @@ class Server {
         $this->name = $serverData['name'];
         $this->host = $serverData['host'];
         $this->port = $serverData['port'];
+        $this->api_endpoint = $serverData['api_endpoint'] ?? null;
         $this->encrypt_secret_code = $serverData['encrypt_secret_code'];
-        $this->type = VPNType::from($serverData['type']);
+        $this->type = AccessType::from($serverData['type']);
         $this->subs_url = $serverData['subs_url'] ?? null;
         $this->created_at = new DateTimeImmutable($serverData['created_at']);
         $this->status = $serverData['status'];

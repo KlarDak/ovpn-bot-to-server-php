@@ -32,19 +32,19 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_unique_userid` (`telegram_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Stores user accounts, activity, subscription, and account status';
 
-CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Internal user ID',
-  `telegram_id` bigint DEFAULT NULL COMMENT 'Telegram user ID',
-  `email` text COMMENT 'Email for non-Telegram user',
-  `username` text COMMENT 'User''s Telegram username',
-  `language` varchar(100) NOT NULL COMMENT 'User''s preferred language',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Account creation date and time',
-  `last_activity_at` datetime DEFAULT NULL COMMENT 'Last user activity date and time',
-  `expired_at` datetime DEFAULT NULL COMMENT 'Subscription expiration date and time',
-  `last_payment_at` datetime DEFAULT NULL COMMENT 'Last successful payment date and time',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Whether the user account is active',
-  `disabled_at` datetime DEFAULT NULL COMMENT 'Account deactivation date and time',
-  `is_dropped` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether the user account is permanently dropped',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `users_unique_userid` (`telegram_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Stores user accounts, activity, subscription, and account status';
+CREATE TABLE `servers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `host` varchar(255) NOT NULL,
+  `port` smallint unsigned NOT NULL,
+  `api_endpoint` text,
+  `encrypt_secret_code` text NOT NULL,
+  `type` varchar(32) NOT NULL,
+  `subs_url` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(32) NOT NULL,
+  `disabled_at` datetime DEFAULT NULL,
+  `is_dropped` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
