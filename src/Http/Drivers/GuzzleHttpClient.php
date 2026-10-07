@@ -9,14 +9,10 @@ use GuzzleHttp\Client;
 class GuzzleHttpClient implements HttpClientInterface {
     private Client $client;
 
-    function __construct(string $host, int $port, string $secret_key, string $api_endpoint = "/api") {
+    function __construct(string $host, int $port, string $api_endpoint = "/api") {
         try {
             $this->client = new Client([
                 'base_uri' => $host . ':' . $port . $api_endpoint,
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $secret_key,
-                    'Content-Type' => 'application/json',
-                ],
                 'http_errors' => false,
             ]);
         }
@@ -25,7 +21,7 @@ class GuzzleHttpClient implements HttpClientInterface {
         }
     }
 
-    public function request(string $method, string $endpoint, array $headers = [], array $options = []): HttpResponse {
+    public function request(string $method, string $endpoint, array $options = [], array $headers = []): HttpResponse {
         try {
             $response = $this->client->request($method, $endpoint, array_merge(['headers' => $headers], $options));
             
@@ -35,7 +31,7 @@ class GuzzleHttpClient implements HttpClientInterface {
                 (string) $response->getBody()
             );
         }
-        catch (\Exception $e) {
+        catch (\RuntimeException $e) {
             throw new \RuntimeException('Failed to make request: ' . $e->getMessage());
         }
     }

@@ -2,9 +2,10 @@
 
 namespace CNS\BotToServer\Resources;
 
+use CNS\BotToServer\Config\BTSConfig;
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
-use CNS\BotToServer\Security\SecretCipher;
+use CNS\BotToServer\Node\OpenVPN\OpenVPNContract;
 use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\Server;
 
@@ -13,12 +14,14 @@ class ServerResource {
     private string $server_name;
     private AccessType $access_type;
     private string|HttpClientInterface $httpClient;
-    function __construct(IDBConnector $dbConnector, string|HttpClientInterface $httpClient, string $server_name, AccessType $accessType)
+    private BTSConfig $btsConfig;
+    function __construct(IDBConnector $dbConnector, string|HttpClientInterface $httpClient, string $server_name, AccessType $accessType, BTSConfig $bTSConfig)
     {
         $this->dbConnector = $dbConnector;
         $this->httpClient = $httpClient;
         $this->server_name = $server_name;
         $this->access_type = $accessType;
+        $this->btsConfig = $bTSConfig;
     }
 
     public function contract() : mixed {
@@ -35,11 +38,11 @@ class ServerResource {
             }
 
             if (gettype($this->httpClient) == "string") {
-                $this->httpClient = new $this->httpClient($result['host'], $result['port'], SecretCipher::decrypt($result['encrypt_secret_code'], $_ENV["SECRET_KEY"]), $result["api_endpoint"] ?? "/api");
+                $this->httpClient = new $this->httpClient($result['host'], $result['port'], $result["api_endpoint"] ?? "/api");
             }
 
             return match ($this->access_type) {
-                AccessType::OPENVPN => new \CNS\BotToServer\Node\OpenVPN\OpenVPNContract($result['code'], $result['subs_url'], $this->httpClient, $this->dbConnector),
+                AccessType::OPENVPN => new OpenVPNContract($this->httpClient, $this->dbConnector, $this->btsConfig,  $result["subs_url"], $result["code"], $result["encrypt_secret_code"]),
             };
         }
         catch (\Exception $e) {

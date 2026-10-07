@@ -57,6 +57,4 @@ class ServersResource {
     public function start() {}
     public function block() {}
     public function pardon() {}
-
-
 }
