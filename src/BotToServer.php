@@ -9,6 +9,7 @@ use CNS\BotToServer\Resources\AccessesResource;
 use CNS\BotToServer\Resources\AccessResource;
 use CNS\BotToServer\Resources\ServerResource;
 use CNS\BotToServer\Resources\ServersResource;
+use CNS\BotToServer\Resources\SubsResource;
 use CNS\BotToServer\Resources\UserResource;
 use CNS\BotToServer\Resources\UsersResource;
 use CNS\BotToServer\Types\AccessType;
@@ -43,6 +44,10 @@ class BotToServer {
 
     public function accesses(int $user_id) : AccessesResource {
         return new AccessesResource($this->dbConnector, $user_id);
+    }
+
+    public function subs() : SubsResource {
+        return new SubsResource($this->dbConnector);
     }
 
     public function server(string $server_name, AccessType $accessType) : ServerResource {

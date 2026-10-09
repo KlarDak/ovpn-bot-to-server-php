@@ -68,4 +68,17 @@ final class Env {
 
         return $result;
     }
+
+    public static function getSubsUrls(): array
+    {
+        $result = [];
+
+        foreach (array_merge(getenv() ?: [], $_ENV) as $key => $value) {
+            if (preg_match('/^SUB_(.+)_URL$/', $key, $matches)) {
+                $result[$matches[1]] = (string) $value;
+            }
+        }
+
+        return $result;
+    }
 }
