@@ -42,7 +42,7 @@ class ServerResource {
             }
 
             return match ($this->access_type) {
-                AccessType::OPENVPN => new OpenVPNContract($this->httpClient, $this->dbConnector, $this->btsConfig,  $result["subs_url"], $result["code"], $result["encrypt_secret_code"]),
+                AccessType::OPENVPN => new OpenVPNContract($this->httpClient, $this->dbConnector, $this->btsConfig, $result["code"], $result["encrypt_secret_code"]),
             };
         }
         catch (\Exception $e) {
