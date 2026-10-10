@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "tasks": [
+    {
+      "id": "1a29c3cc-fb53-4fab-8b01-8ae20cd1faa5",
+      "title": "Change error type",
+      "done": false,
+      "links": [
+        {
+          "uri": "file:///c%3A/Users/KlarDak/Documents/Projects/ovpn-bot-to-server-php/src/Resources/SubsResource.php",
+          "line": 29,
+          "column": 10,
+          "tag": "TODO",
+          "preview": "# TODO: Change error type"
+        }
+      ],
+      "createdAt": 1791594565675,
+      "updatedAt": 1791594565675,
+      "order": 1
+    }
+  ]
+}

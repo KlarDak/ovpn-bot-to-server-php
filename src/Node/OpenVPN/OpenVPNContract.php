@@ -14,11 +14,14 @@ use CNS\BotToServer\Security\SecretCipher;
 
 class OpenVPNContract implements AccessContractInterface, ActiveContractInterface, MetricsContractInterface, SubsContractInterface {
     private OpenVPNFuncAdapter $openVPNFuncAdapter;
-    function __construct(private HttpClientInterface $httpClient, private IDBConnector $dbConnector, private BTSConfig $btsConfig, string $code, string $encrypt_secret_code) {
+    private string $subs_url;
+
+    function __construct(private HttpClientInterface $httpClient, private IDBConnector $dbConnector, private BTSConfig $btsConfig, string $code, string $encrypt_secret_code, string $subs_url) {
         $this->openVPNFuncAdapter = new OpenVPNFuncAdapter(
             $this->httpClient,
             JWTCipher::encode($this->btsConfig->audCode, $code, $this->btsConfig->role, SecretCipher::decrypt($encrypt_secret_code, $this->btsConfig->encryptionKey))
         );
+        $this->subs_url = $subs_url;
     }
     public function access() : AccessContract {
         return new AccessContract($this->openVPNFuncAdapter);
@@ -30,6 +33,6 @@ class OpenVPNContract implements AccessContractInterface, ActiveContractInterfac
         return new MetricsContract($this->openVPNFuncAdapter);
     }
     public function subs() : SubsContract {
-        return new SubsContract($this->dbConnector, $this->btsConfig);
+        return new SubsContract($this->dbConnector, $this->subs_url);
     }
 }

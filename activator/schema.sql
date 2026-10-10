@@ -37,14 +37,26 @@ CREATE TABLE `servers` (
   `code` varchar(32) NOT NULL,
   `name` varchar(255) NOT NULL,
   `host` varchar(255) NOT NULL,
-  `port` smallint unsigned NOT NULL,
-  `api_endpoint` text,
+  `port` int unsigned NOT NULL,
+  `api_endpoint` NOT NULL text,
   `encrypt_secret_code` text NOT NULL,
   `type` varchar(32) NOT NULL,
   `subs_url` text,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` varchar(32) NOT NULL,
   `disabled_at` datetime DEFAULT NULL,
+  `is_dropped` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `subs` (
+  `id` int unsigned NOT NULL,
+  `short_code` varchar(100) NOT NULL,
+  `server_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `access_id` int unsigned NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_used` tinyint(1) NOT NULL DEFAULT '0',
+  `used_at` datetime DEFAULT NULL,
   `is_dropped` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

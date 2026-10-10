@@ -20,15 +20,15 @@ class SubsResource {
         return $this->dbConnector->execute($query, $params);
     }
 
-    public function get(string $short_code) : Subs {
+    public function get(string $short_code) : ?Subs {
         $query = "SELECT * FROM subs WHERE short_code = :short_code AND is_dropped = 0";
         $params = [
             ":short_code" => $short_code
         ];
 
         $result = $this->dbConnector->fetchOne($query, $params);
-        # TODO: Change error type
-        return ($result) ? new Subs($result) : throw new Exception("ERROR TEST");
+
+        return ($result !== null) ? new Subs($result) : null;
     }
 
     public function update(string $old_short_code, string $new_short_code) : bool {
@@ -40,7 +40,7 @@ class SubsResource {
         return $this->dbConnector->execute($query, $params);
     }
 
-    public function updateUser(string $short_code) : bool {
+    public function setUsed(string $short_code) : bool {
         $query = "UPDATE subs SET is_used = 1, used_at = NOW() WHERE short_code = :short_code AND is_dropped = 0";
         $params = [
             ":short_code" => $short_code,
