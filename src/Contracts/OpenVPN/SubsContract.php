@@ -1,6 +1,6 @@
 <?php
 
-namespace CNS\BotToServer\Node\OpenVPN;
+namespace CNS\BotToServer\Contracts\OpenVPN;
 
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Resources\SubsResource;

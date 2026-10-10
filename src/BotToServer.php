@@ -50,8 +50,8 @@ class BotToServer {
         return new SubsResource($this->dbConnector);
     }
 
-    public function server(string $server_name, AccessType $accessType) : ServerResource {
-        return new ServerResource($this->dbConnector, $this->httpClient, $server_name, $accessType, $this->btsConfig);
+    public function server(string $code) : ServerResource {
+        return new ServerResource($this->dbConnector, $this->httpClient, $this->btsConfig, $code);
     }
 
     public function servers() : ServersResource {

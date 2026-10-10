@@ -1,6 +1,6 @@
 <?php
 
-namespace CNS\BotToServer\Node\Interfaces;
+namespace CNS\BotToServer\Contracts\Interfaces;
 
 interface SystemContractInterface {
     public function system() : mixed;

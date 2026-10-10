@@ -5,58 +5,61 @@ namespace CNS\BotToServer\Resources;
 use CNS\BotToServer\Config\BTSConfig;
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
-use CNS\BotToServer\Node\OpenVPN\OpenVPNContract;
+use CNS\BotToServer\Contracts\OpenVPN\OpenVPNContract;
 use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\Server;
+use Exception;
 
 class ServerResource {
-    private IDBConnector $dbConnector;
-    private string $server_name;
-    private AccessType $access_type;
-    private string|HttpClientInterface $httpClient;
-    private BTSConfig $btsConfig;
-    function __construct(IDBConnector $dbConnector, string|HttpClientInterface $httpClient, string $server_name, AccessType $accessType, BTSConfig $bTSConfig)
+    private string $code;
+    function __construct(private IDBConnector $dbConnector, private string|HttpClientInterface $httpClient, private BTSConfig $btsConfig, string $code)
     {
         $this->dbConnector = $dbConnector;
         $this->httpClient = $httpClient;
-        $this->server_name = $server_name;
-        $this->access_type = $accessType;
-        $this->btsConfig = $bTSConfig;
+        $this->code = $code;
     }
 
-    public function contract() : mixed {
+    public function contract(): mixed
+    {
         try {
-            $query = "SELECT code, host, port, api_endpoint, encrypt_secret_code, subs_url FROM servers WHERE server_name = :server_name AND type = :vpn_type AND is_dropped = 0";
-            $params = [
-                ':server_name' => $this->server_name,
-                ':vpn_type' => $this->access_type->value
-            ];
-            $result = $this->dbConnector->fetchOne($query, $params);
-            
-            if (!$result) {
-                throw new \Exception("Server not found.");
+            $server = $this->info();
+
+            if (is_string($this->httpClient)) {
+                $class = $this->httpClient;
+
+                $this->httpClient = new $class(
+                    $server->host,
+                    $server->port,
+                    $server->api_endpoint
+                );
             }
 
-            if (gettype($this->httpClient) == "string") {
-                $this->httpClient = new $this->httpClient($result['host'], $result['port'], $result["api_endpoint"] ?? "/api");
-            }
+            $contractClass = $this->btsConfig->contracts[$server->type]
+                ?? throw new \InvalidArgumentException(
+                    "Unknown contract type: {$server->type}"
+                );
 
-            return match ($this->access_type) {
-                AccessType::OPENVPN => new OpenVPNContract($this->httpClient, $this->dbConnector, $this->btsConfig, $result["code"], $result["encrypt_secret_code"], $result["subs_url"]),
-            };
-        }
-        catch (\Exception $e) {
-            throw new \Exception("Error creating contract: " . $e->getMessage());
+            return new $contractClass(
+                $this->dbConnector,
+                $this->httpClient,
+                $this->btsConfig,
+                $server
+            );
+
+        } catch (\Throwable $e) {
+            throw new \RuntimeException(
+                "Error creating contract: " . $e->getMessage(),
+                previous: $e
+            );
         }
     }
 
     public function info() : Server {
-        $query = "SELECT * FROM servers WHERE server_name = :server_name AND type = :vpn_type AND is_dropped = 0";
+        $query = "SELECT * FROM servers WHERE code = :code AND is_dropped = 0";
         $params = [
-            ':server_name' => $this->server_name,
-            ':vpn_type' => $this->access_type->value
+            ':code' => $this->code
         ];
         $result = $this->dbConnector->fetchOne($query, $params);
-        return $result ? new Server($result) : throw new \Exception("Server not found.");
+        return $result ? new Server($result) : throw new Exception("Server not found.");
     }
 }

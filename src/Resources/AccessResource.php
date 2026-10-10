@@ -30,12 +30,12 @@ class AccessResource {
         return $result ? new Access($result) : throw new AccessNotFoundException($this->uuid);
     }
 
-    public function create(int $userId, AccessType $AccessType, int $server_id, ?string $name = null) : bool {
+    public function create(int $userId, string $AccessType, int $server_id, ?string $name = null) : bool {
         $query = "INSERT INTO accesses (user_id, uuid, type, server_id, name) VALUES (:user_id, :uuid, :type, :server_id, :name)";
         $params = [
             ':user_id' => $userId,
             ':uuid' => $this->uuid,
-            ':type' => $AccessType->value,
+            ':type' => $AccessType,
             ':server_id' => $server_id,
             ':name' => $name
         ];

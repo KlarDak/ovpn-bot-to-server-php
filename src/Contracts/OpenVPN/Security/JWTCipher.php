@@ -1,6 +1,6 @@
 <?php
 
-namespace CNS\BotToServer\Node\OpenVPN\Security;
+namespace CNS\BotToServer\Contracts\OpenVPN\Security;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

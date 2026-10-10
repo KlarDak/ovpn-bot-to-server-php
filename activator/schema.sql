@@ -1,7 +1,7 @@
-CREATE DATABASE 'unlimitdb';
+CREATE DATABASE unlimitdb;
 
 CREATE TABLE `accesses` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Internal access ID',
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal access ID',
   `user_id` int NOT NULL COMMENT 'ID of the user who owns the access',
   `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Unique access identifier',
   `name` text COMMENT 'User-defined access name',
@@ -16,7 +16,7 @@ CREATE TABLE `accesses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Internal user ID',
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal user ID',
   `telegram_id` bigint DEFAULT NULL COMMENT 'Telegram user ID',
   `email` text COMMENT 'Email for non-Telegram user',
   `username` text COMMENT 'User''s Telegram username',
@@ -33,12 +33,12 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Stores user accounts, activity, subscription, and account status';
 
 CREATE TABLE `servers` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(32) NOT NULL,
   `name` varchar(255) NOT NULL,
   `host` varchar(255) NOT NULL,
   `port` int unsigned NOT NULL,
-  `api_endpoint` NOT NULL text,
+  `api_endpoint` text NOT NULL,
   `encrypt_secret_code` text NOT NULL,
   `type` varchar(32) NOT NULL,
   `subs_url` text,
@@ -47,16 +47,18 @@ CREATE TABLE `servers` (
   `disabled_at` datetime DEFAULT NULL,
   `is_dropped` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
+  UNIQUE KEY `uq_servers_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `subs` (
   `id` int unsigned NOT NULL,
   `short_code` varchar(100) NOT NULL,
-  `server_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `server_id` int unsigned CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `access_id` int unsigned NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_used` tinyint(1) NOT NULL DEFAULT '0',
   `used_at` datetime DEFAULT NULL,
   `is_dropped` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
+  UNIQUE KEY `uq_subs_short_code` (`short_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

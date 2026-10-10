@@ -13,7 +13,7 @@ class ServersResource {
     private IDBConnector $dbConnector;
     public array $allowedFilterBy = [
         "name",
-        "hort",
+        "host",
         "port",
         "api_endpoint",
         "type",
@@ -32,10 +32,10 @@ class ServersResource {
         int $port,
         string $api_endpoint,
         string $encrypt_secret_code,
-        AccessType $type,
+        string $type,
         ?string $subs_url = null,
     ) : bool {
-        $query = "INSERT INTO server(code, name, host, port, api_endpoint, encrypt_secret_code, type, subs_url) VALUES (:code, :name, :host, :port, :api_enpoint, :encrypt_secret_code, :type, :subs_url)";
+        $query = "INSERT INTO servers(code, name, host, port, api_endpoint, encrypt_secret_code, type, subs_url) VALUES (:code, :name, :host, :port, :api_enpoint, :encrypt_secret_code, :type, :subs_url)";
         $params = [
             ":code" => $code,
             ":name" => $name,
@@ -43,39 +43,36 @@ class ServersResource {
             ":port" => $port,
             ":api_endpoint" => $api_endpoint,
             ":encrypt_secret_code" => $encrypt_secret_code,
-            ":type" => $type->value,
+            ":type" => $type,
             ":subs_url" => $subs_url,
         ];
 
         return $this->dbConnector->execute($query, $params);
     }
     public function getAll() : array {
-        $query = "SELECT * FROM server WHERE is_dropped = 0";
+        $query = "SELECT * FROM servers WHERE is_dropped = 0";
         $result = $this->dbConnector->fetchAll($query, []);
 
         return array_map(fn($server) => new Server($server), $result);
     }
 
     public function filterBy(array $conditions) : array {
-        $conditions = ['is_dropped = 0'];
         $params = [];
+        $query = [];
 
-        foreach ($this->allowedFilterBy as $column => $value) {
+        foreach ($conditions as $column => $value) {
             if (!in_array($column, $this->allowedFilterBy, true)) {
-                throw new \InvalidArgumentException(
-                    "Unsupported filter: {$column}"
-                );
+                # TODO: Add logger
+                continue;
             }
 
-            if ($value instanceof \BackedEnum) {
-                $value = $value->value;
-            }
-
-            $conditions[] = "{$column} = :{$column}";
+            $query[] = "{$column} = :{$column}";
             $params[":{$column}"] = $value;
         }
 
-        $where = implode(' AND ', $conditions);
+        $query[] = ['is_dropped = 0'];
+
+        $where = implode(' AND ', $query);
         $query = "SELECT * FROM servers WHERE {$where}";
 
         $result = $this->dbConnector->fetchAll($query, $params);

@@ -4,7 +4,6 @@ namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Types\Access;
-use CNS\BotToServer\Types\AccessType;
 
 class AccessesResource {
     private IDBConnector $dbConnector;
@@ -22,11 +21,11 @@ class AccessesResource {
         return array_map(fn($result) => new Access($result), $results);
     }
 
-    public function count(?AccessType $vpn_type = null) : array {
+    public function count(?string $vpn_type = null) : array {
         $query = "SELECT COUNT(*) FROM accesses WHERE ". ($vpn_type ? "type = :vpn_type AND" : "") ." user_id = :user_id AND is_dropped = 0";
         $params = [':user_id' => $this->user_id];
         if ($vpn_type) {
-            $params[':vpn_type'] = $vpn_type->value;
+            $params[':vpn_type'] = $vpn_type;
         }
         return $this->dbConnector->fetchOne($query, $params);
     }

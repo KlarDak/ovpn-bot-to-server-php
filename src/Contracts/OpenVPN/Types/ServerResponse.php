@@ -1,6 +1,6 @@
 <?php
 
-namespace CNS\BotToServer\Node\OpenVPN\Types;
+namespace CNS\BotToServer\Contracts\OpenVPN\Types;
 
 class ServerResponse {
     public int $code;

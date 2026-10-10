@@ -22,12 +22,12 @@ class UserResource {
         return $this->id !== 0;
     }
 
-    public function get() : User {
+    public function get() : ?User {
         $query = "SELECT * FROM users WHERE id = :id LIMIT 1";
         $params = [':id' => $this->id];
         $result = $this->dbConnector->fetchOne($query, $params);
         
-        return $result ? new User($result) : throw new UserNotFoundException("User with ID {$this->id} not found.");
+        return ($result !== null) ? new User($result) : null;
     }
 
     public function create(UserType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
@@ -100,13 +100,13 @@ class UserResource {
     }
 
     public function block() : bool {
-        $query = "UPDATE users SET is_active = 0 AND disabled_at = NOW() WHERE id = :id AND is_dropped = 0";
+        $query = "UPDATE users SET is_active = 0, disabled_at = NOW() WHERE id = :id AND is_dropped = 0";
         $params = [':id' => $this->id];
         return $this->dbConnector->execute($query, $params);
     }
 
     public function unblock() : bool {
-        $query = "UPDATE users SET is_active = 1 AND disabled_at = NULL WHERE id = :id AND is_dropped = 0";
+        $query = "UPDATE users SET is_active = 1, disabled_at = NULL WHERE id = :id AND is_dropped = 0";
         $params = [':id' => $this->id];
         return $this->dbConnector->execute($query, $params);
     }

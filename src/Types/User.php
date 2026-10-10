@@ -26,10 +26,10 @@ final class User {
         $this->language = (string) $userData['language'];
         $this->created_at = new \DateTimeImmutable($userData['created_at']);
         $this->last_activity_at = isset($userData['last_activity_at']) ? new \DateTimeImmutable($userData['last_activity_at']) : null;
-        $this->expired_at = isset($userData['expired_at']) ? new \DateTimeImmutable($userData['expired_at']) : null;
-        $this->last_payment_at = isset($userData['last_payment_at']) ? new \DateTimeImmutable($userData['last_payment_at']) : null;
+        $this->expired_at = ($userData['expired_at'] !== null) ? new \DateTimeImmutable($userData['expired_at']) : null;
+        $this->last_payment_at = ($userData['last_payment_at'] !== null) ? new \DateTimeImmutable($userData['last_payment_at']) : null;
         $this->is_active = (bool) $userData['is_active'];
-        $this->disabled_at = isset($userData['disabled_at']) ? new \DateTimeImmutable($userData['disabled_at']) : null;
+        $this->disabled_at = ($userData['disabled_at'] !== null) ? new \DateTimeImmutable($userData['disabled_at']) : null;
         $this->is_dropped = (bool) $userData['is_dropped']; 
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace CNS\BotToServer\Node\OpenVPN;
+namespace CNS\BotToServer\Contracts\OpenVPN;
 
 use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
-use CNS\BotToServer\Node\OpenVPN\Types\ServerResponse;
+use CNS\BotToServer\Contracts\OpenVPN\Types\ServerResponse;
 use Exception;
 
 class AccessContract {

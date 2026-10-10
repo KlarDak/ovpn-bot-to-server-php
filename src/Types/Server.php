@@ -12,7 +12,7 @@ class Server {
     public int $port;
     public ?string $api_endpoint = null;
     public string $encrypt_secret_code;
-    public AccessType $type;
+    public string $type;
     public ?string $subs_url = null;
     public DateTimeImmutable $created_at;
     public string $status;
@@ -28,11 +28,11 @@ class Server {
         $this->port = $serverData['port'];
         $this->api_endpoint = $serverData['api_endpoint'] ?? null;
         $this->encrypt_secret_code = $serverData['encrypt_secret_code'];
-        $this->type = AccessType::from($serverData['type']);
+        $this->type = $serverData['type'];
         $this->subs_url = $serverData['subs_url'] ?? null;
         $this->created_at = new DateTimeImmutable($serverData['created_at']);
         $this->status = $serverData['status'];
-        $this->disabled_at = new DateTimeImmutable($serverData['disabled_at']);
-        $this->is_dropped = (bool)$serverData['is_dropped'];
+        $this->disabled_at = ($serverData["disabled_at"] !== null) ? new DateTimeImmutable($serverData['disabled_at']) : null; 
+        $this->is_dropped = (bool) $serverData['is_dropped'];
     }
 }
