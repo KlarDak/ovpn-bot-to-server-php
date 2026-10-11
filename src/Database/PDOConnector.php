@@ -7,10 +7,10 @@ use Override;
 class PDOConnector implements IDBConnector {
     private \PDO $connection;
 
-    function __construct(string $hostname, string $username, string $password, string $dbname)
+    function __construct(string $hostname, string $username, string $password, string $dbname, int $port = 3306)
     {
         try {
-            $this->connection = new \PDO("mysql:host=$hostname;dbname=$dbname", $username, $password);
+            $this->connection = new \PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
             $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             throw new \Exception("Connection failed: " . $e->getMessage());
