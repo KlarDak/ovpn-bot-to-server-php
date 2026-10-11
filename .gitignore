@@ -7,3 +7,4 @@ Tests/http/
 Tests/*
 !Tests/ApiCompatibilityTest.php
 !Tests/ApiIntegrationTest.php
+.vscode

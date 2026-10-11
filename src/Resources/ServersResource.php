@@ -35,7 +35,7 @@ class ServersResource {
         string $type,
         ?string $subs_url = null,
     ) : bool {
-        $query = "INSERT INTO servers(code, name, host, port, api_endpoint, encrypt_secret_code, type, subs_url) VALUES (:code, :name, :host, :port, :api_enpoint, :encrypt_secret_code, :type, :subs_url)";
+        $query = "INSERT INTO servers(code, name, host, port, api_endpoint, encrypt_secret_code, type, subs_url, status) VALUES (:code, :name, :host, :port, :api_endpoint, :encrypt_secret_code, :type, :subs_url, 'active')";
         $params = [
             ":code" => $code,
             ":name" => $name,
