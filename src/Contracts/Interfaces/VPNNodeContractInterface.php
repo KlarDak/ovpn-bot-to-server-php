@@ -14,4 +14,6 @@ interface VPNNodeContractInterface {
         BTSConfig $btsConfig,
         Server $server
     );
+
+    public function whichContract() : string;
 }

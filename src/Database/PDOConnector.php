@@ -56,4 +56,26 @@ class PDOConnector implements IDBConnector {
             throw new \Exception("Query failed: " . $e->getMessage());
         }
     }
+    
+    #[Override]
+    public function insert(string $query, array $params = []): int
+    {
+        try {
+            $smtp = $this->connection->prepare($query);
+            $smtp->execute($params);
+
+            $id = (int) $this->connection->lastInsertId();
+
+            if ($id <= 0) {
+                throw new \RuntimeException(
+                    'Insert succeeded, but no generated ID was returned.'
+                );
+            }
+
+            return $id;
+        }
+        catch (\PDOException $e) {
+            throw new \Exception("Query failed: " . $e->getMessage());
+        }
+    }
 }

@@ -14,11 +14,23 @@ class AccessesResource {
         $this->user_id = $user_id;
     }
 
-    public function list() : array {
+    public function list(?string $vpn_type = null): array
+    {
         $query = "SELECT * FROM accesses WHERE user_id = :user_id AND is_dropped = 0";
+
         $params = [':user_id' => $this->user_id];
+
+        if ($vpn_type !== null) {
+            $query .= " AND type = :type";
+            $params[':type'] = $vpn_type;
+        }
+
         $results = $this->dbConnector->fetchAll($query, $params);
-        return array_map(fn($result) => new Access($result), $results);
+
+        return array_map(
+            static fn(array $result) => new Access($result),
+            $results
+        );
     }
 
     public function count(?string $vpn_type = null) : array {

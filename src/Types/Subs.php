@@ -20,7 +20,7 @@ class Subs {
         $this->short_code = $subsData["short_code"];
         $this->server_id = (int) $subsData["server_id"];
         $this->access_id = (int) $subsData["access_id"];
-        $this->created_at = $subsData["created_at"];
+        $this->created_at = new DateTimeImmutable($subsData["created_at"]);
         $this->is_used = (bool) $subsData["is_used"];
         $this->used_at = $subsData["used_at"];
         $this->is_dropped = (bool) $subsData["is_dropped"];

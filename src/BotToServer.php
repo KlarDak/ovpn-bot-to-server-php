@@ -12,7 +12,6 @@ use CNS\BotToServer\Resources\ServersResource;
 use CNS\BotToServer\Resources\SubsResource;
 use CNS\BotToServer\Resources\UserResource;
 use CNS\BotToServer\Resources\UsersResource;
-use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\UserType;
 
 class BotToServer {
@@ -30,8 +29,8 @@ class BotToServer {
         $this->btsConfig = $btsConfig ?? new BTSConfig();
     }
 
-    public function user(int $user_id, UserType $userType) : UserResource {
-        return new UserResource($this->dbConnector, $user_id, $userType);
+    public function user(int|string $userIdentifier, UserType $userType) : UserResource {
+        return new UserResource($this->dbConnector, $userIdentifier, $userType);
     }
 
     public function users() : UsersResource {

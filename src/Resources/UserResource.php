@@ -4,17 +4,20 @@ namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Exceptions\UserAlreadyExistsException;
-use CNS\BotToServer\Exceptions\UserNotFoundException;
 use CNS\BotToServer\Types\User;
-use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\UserType;
 
 class UserResource {
     private IDBConnector $dbConnector;
     private int $id;
+    private int|string $identifier;
+    private UserType $userType;
+
     function __construct(IDBConnector $dbConnector, int|string $identifier, UserType $userType)
     {
         $this->dbConnector = $dbConnector;
+        $this->identifier = $identifier;
+        $this->userType = $userType;
         $this->id = $this->setIdByIdentifier($identifier, $userType);
     }
 
@@ -30,19 +33,19 @@ class UserResource {
         return ($result !== null) ? new User($result) : null;
     }
 
-    public function create(UserType $userType, int|string $identifier, string $language, ?string $username = null) : bool {
+    public function create(string $language, ?string $username = null) : int {
         if ($this->exists()) {
-            throw new UserAlreadyExistsException($identifier);
+            throw new UserAlreadyExistsException($this->identifier);
         }
     
-        $query = "INSERT INTO users ($userType->value, language, username) VALUES (:identifier, :language, :username)";
+        $query = "INSERT INTO users ({$this->userType->value}, language, username) VALUES (:identifier, :language, :username)";
         $params = [
-            ':identifier' => $identifier,
+            ':identifier' => $this->identifier,
             ':language' => $language,
             ':username' => $username
         ];
 
-        return $this->dbConnector->execute($query, $params);
+        return $this->dbConnector->insert($query, $params);
     }
 
     public function update(
@@ -123,6 +126,6 @@ class UserResource {
         $params = [':identifier' => $identifier];
         $result = $this->dbConnector->fetchOne($query, $params);
         
-        return (int) $result['id'] ?? 0;
+        return (int) ($result['id'] ?? 0);
     }
 }

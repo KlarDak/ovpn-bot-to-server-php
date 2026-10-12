@@ -4,12 +4,11 @@ namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Types\Subs;
-use Exception;
 
 class SubsResource {
     function __construct(private IDBConnector $dbConnector) {}
 
-    public function create(string $short_code, int $server_id, int $access_id) : bool {
+    public function create(string $short_code, int $server_id, int $access_id) : int {
         $query = "INSERT INTO subs (short_code, server_id, access_id) VALUES (:short_code, :server_id, :access_id)";
         $params = [
             ":short_code" => $short_code,
@@ -17,7 +16,7 @@ class SubsResource {
             ":access_id" => $access_id
         ];
 
-        return $this->dbConnector->execute($query, $params);
+        return $this->dbConnector->insert($query, $params);
     }
 
     public function get(string $short_code) : ?Subs {

@@ -3,11 +3,9 @@
 namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
-use CNS\BotToServer\Types\AccessType;
 use CNS\BotToServer\Types\Server;
 use CNS\BotToServer\Types\ServerStatusType;
 use DateTimeImmutable;
-use Exception;
 
 class ServersResource {
     private IDBConnector $dbConnector;
@@ -34,7 +32,7 @@ class ServersResource {
         string $encrypt_secret_code,
         string $type,
         ?string $subs_url = null,
-    ) : bool {
+    ) : int {
         $query = "INSERT INTO servers(code, name, host, port, api_endpoint, encrypt_secret_code, type, subs_url, status) VALUES (:code, :name, :host, :port, :api_endpoint, :encrypt_secret_code, :type, :subs_url, 'active')";
         $params = [
             ":code" => $code,
@@ -47,7 +45,7 @@ class ServersResource {
             ":subs_url" => $subs_url,
         ];
 
-        return $this->dbConnector->execute($query, $params);
+        return $this->dbConnector->insert($query, $params);
     }
     public function getAll() : array {
         $query = "SELECT * FROM servers WHERE is_dropped = 0";
@@ -70,7 +68,7 @@ class ServersResource {
             $params[":{$column}"] = $value;
         }
 
-        $query[] = ['is_dropped = 0'];
+        $query[] = 'is_dropped = 0';
 
         $where = implode(' AND ', $query);
         $query = "SELECT * FROM servers WHERE {$where}";
@@ -83,10 +81,10 @@ class ServersResource {
         );
     }
 
-    public function get(string $code) : Server {
+    public function get(string $code) : ?Server {
         $query = "SELECT * FROM servers WHERE code = :code AND is_dropped = 0";
         $result = $this->dbConnector->fetchOne($query, [":code" => $code]);
-        return $result ? new Server($result) : throw new Exception("Server not found.");
+        return $result ? new Server($result) : null;
     }
     public function update(
         string $code,

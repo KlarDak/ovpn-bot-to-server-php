@@ -11,8 +11,9 @@ class GuzzleHttpClient implements HttpClientInterface {
 
     function __construct(string $host, int $port, string $api_endpoint = "/api") {
         try {
+            
             $this->client = new Client([
-                'base_uri' => $host . ':' . $port . $api_endpoint,
+                'base_uri' => "{$host}:{$port}{$api_endpoint}/",
                 'http_errors' => false,
             ]);
         }

@@ -3,7 +3,6 @@
 namespace CNS\BotToServer\Resources;
 
 use CNS\BotToServer\Database\IDBConnector;
-use CNS\BotToServer\Types\Access;
 use CNS\BotToServer\Types\User;
 use DateTimeImmutable;
 

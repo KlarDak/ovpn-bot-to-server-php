@@ -5,7 +5,6 @@ namespace CNS\BotToServer\Resources;
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Exceptions\AccessNotFoundException;
 use CNS\BotToServer\Types\Access;
-use CNS\BotToServer\Types\AccessType;
 
 class AccessResource {
     private IDBConnector $dbConnector;
@@ -30,7 +29,7 @@ class AccessResource {
         return $result ? new Access($result) : throw new AccessNotFoundException($this->uuid);
     }
 
-    public function create(int $userId, string $AccessType, int $server_id, ?string $name = null) : bool {
+    public function create(int $userId, string $AccessType, int $server_id, ?string $name = null) : int {
         $query = "INSERT INTO accesses (user_id, uuid, type, server_id, name) VALUES (:user_id, :uuid, :type, :server_id, :name)";
         $params = [
             ':user_id' => $userId,
@@ -40,7 +39,7 @@ class AccessResource {
             ':name' => $name
         ];
 
-        return $this->dbConnector->execute($query, $params);
+        return $this->dbConnector->insert($query, $params);
     }
     
     public function update(string $name) : bool {
@@ -53,12 +52,12 @@ class AccessResource {
         return $this->dbConnector->execute($query, $params);
     }
     public function block() : bool{
-        $query = "UPDATE accesses SET is_active = 0 AND disabled_at = NOW() WHERE uuid = :uuid AND is_dropped = 0";
+        $query = "UPDATE accesses SET is_active = 0, disabled_at = NOW() WHERE uuid = :uuid AND is_dropped = 0";
         $params = [':uuid' => $this->uuid];
         return $this->dbConnector->execute($query, $params);
     }
     public function unblock() : bool {
-        $query = "UPDATE accesses SET is_active = 1 AND disabled_at = NULL WHERE uuid = :uuid AND is_dropped = 0";
+        $query = "UPDATE accesses SET is_active = 1, disabled_at = NULL WHERE uuid = :uuid AND is_dropped = 0";
         $params = [':uuid' => $this->uuid];
         return $this->dbConnector->execute($query, $params);
     }

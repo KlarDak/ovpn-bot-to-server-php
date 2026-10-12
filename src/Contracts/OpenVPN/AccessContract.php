@@ -9,11 +9,11 @@ use Exception;
 class AccessContract {
     function __construct(private OpenVPNFuncAdapter $OpenVPNAdapter) {}
     public function get(string $uuid) : ServerResponse {
-        return new ServerResponse($this->OpenVPNAdapter->request("GET", "/config/$uuid"));
+        return new ServerResponse($this->OpenVPNAdapter->request("GET", "config/$uuid"));
     }
 
     public function create(string $uuid, string $type, int $ttl) : ServerResponse {
-        return new ServerResponse($this->OpenVPNAdapter->request("POST", "/config", [
+        return new ServerResponse($this->OpenVPNAdapter->request("POST", "config", [
             "uuid" => $uuid,
             "type" => $type,
             "time" => $ttl
@@ -21,7 +21,7 @@ class AccessContract {
     }
 
     public function recreate(string $uuid, string $type, int $ttl) : ServerResponse {
-        return new ServerResponse($this->OpenVPNAdapter->request("PUT", "/config/$uuid", [
+        return new ServerResponse($this->OpenVPNAdapter->request("PUT", "config/$uuid", [
             "time" => $ttl,
             "type" => $type
         ]));
@@ -42,11 +42,11 @@ class AccessContract {
             $options["time"] = $ttl;
         }
         
-        return new ServerResponse($this->OpenVPNAdapter->request("PATCH", "/config/$uuid", $options));
+        return new ServerResponse($this->OpenVPNAdapter->request("PATCH", "config/$uuid", $options));
     }
 
     public function delete(string $uuid) : ServerResponse {
-        return new ServerResponse($this->OpenVPNAdapter->request("DELETE", "/config/$uuid"));
+        return new ServerResponse($this->OpenVPNAdapter->request("DELETE", "config/$uuid"));
     }
 
     public function updateAll(array $uuids, string $type, int $ttl) {
@@ -66,11 +66,11 @@ class AccessContract {
             $options["time"] = $ttl;
         }
         
-        return new ServerResponse($this->OpenVPNAdapter->request("PATCH", "/configs/update", $options));
+        return new ServerResponse($this->OpenVPNAdapter->request("PATCH", "configs/update", $options));
     }
 
     public function deleteAll(array $uuids) : ServerResponse {
-        return new ServerResponse($this->OpenVPNAdapter->request("DELETE", "/configs/delete", [
+        return new ServerResponse($this->OpenVPNAdapter->request("DELETE", "configs/delete", [
             "uuids" => $uuids
         ]));
     }

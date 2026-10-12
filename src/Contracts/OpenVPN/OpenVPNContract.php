@@ -3,6 +3,7 @@
 namespace CNS\BotToServer\Contracts\OpenVPN;
 
 use CNS\BotToServer\Config\BTSConfig;
+use CNS\BotToServer\Contracts\Traits\CheckContractTrait;
 use CNS\BotToServer\Database\IDBConnector;
 use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
 use CNS\BotToServer\Contracts\Interfaces\ActiveContractInterface;
@@ -14,15 +15,22 @@ use CNS\BotToServer\Security\SecretCipher;
 use CNS\BotToServer\Types\Server;
 
 class OpenVPNContract implements AccessContractInterface, ActiveContractInterface, MetricsContractInterface, SubsContractInterface {
+    use CheckContractTrait;
     private OpenVPNFuncAdapter $openVPNFuncAdapter;
     private string $subs_url;
 
-    function __construct(private HttpClientInterface $httpClient, private IDBConnector $dbConnector, private BTSConfig $btsConfig, Server $server) {
+    function __construct(
+        private IDBConnector $dbConnector, 
+        private HttpClientInterface $httpClient, 
+        private BTSConfig $btsConfig, 
+        Server $server) {
+        
+        $secret = SecretCipher::decrypt($server->encrypt_secret_code, $this->btsConfig->encryptionKey);
         $this->openVPNFuncAdapter = new OpenVPNFuncAdapter(
             $this->httpClient,
-            JWTCipher::encode($this->btsConfig->audCode, $server->code, $this->btsConfig->role, SecretCipher::decrypt($server->encrypt_secret_code, $this->btsConfig->encryptionKey))
+            fn(): string => JWTCipher::encode($this->btsConfig->audCode, $server->code, $this->btsConfig->role, $secret)
         );
-        $this->subs_url = $server->subs_url;
+        $this->subs_url = $server->subs_url ?? "";
     }
     public function access() : AccessContract {
         return new AccessContract($this->openVPNFuncAdapter);

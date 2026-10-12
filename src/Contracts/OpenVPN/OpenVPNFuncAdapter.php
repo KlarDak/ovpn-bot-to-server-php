@@ -3,20 +3,19 @@
 namespace CNS\BotToServer\Contracts\OpenVPN;
 
 use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
-use CNS\BotToServer\Contracts\OpenVPN\Types\ServerResponse;
 
 class OpenVPNFuncAdapter {
-    private array $headers;
+    function __construct(private HttpClientInterface $httpClient, private \Closure $tokenFactory) {}
 
-    function __construct(private HttpClientInterface $httpClient, string $JWTToken)
-    {
-        $this->headers = [
-            "Authorization" => "Bearer " . $JWTToken
-        ];
-    }
-
-    public function request(string $method, string $endpoint, ?array $options = null) : array{
-        $requestResult = $this->httpClient->request($method, $endpoint, $options, $this->headers);
+    public function request(string $method, string $endpoint, ?array $options = []) : array{
+        $requestResult = $this->httpClient->request($method, $endpoint, 
+            [
+                "json" => $options
+            ], 
+            headers: [
+                "Authorization" => "Bearer " . ($this->tokenFactory)()
+            ]
+        );
 
         return $requestResult->getJsonBody();
     }

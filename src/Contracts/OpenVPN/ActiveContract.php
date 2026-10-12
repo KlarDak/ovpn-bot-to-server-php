@@ -17,14 +17,14 @@ class ActiveContract {
     }
 
     public function kick(string $uuid) : ServerResponse{
-        return new ServerResponse($this->openVPNAdapter->request("POST", "/api/active/kick", ["uuid" => $uuid]));
+        return new ServerResponse($this->openVPNAdapter->request("POST", "active/kick", ["uuid" => $uuid]));
     }
 
     public function ban(string $uuid) : ServerResponse {
-        return new ServerResponse($this->openVPNAdapter->request("POST", "/api/active/ban", ["uuid" => $uuid]));
+        return new ServerResponse($this->openVPNAdapter->request("POST", "active/ban", ["uuid" => $uuid]));
     }
 
     public function pardon(string $uuid) : ServerResponse {
-        return new ServerResponse($this->openVPNAdapter->request("POST", "/api/active/pardon", ["uuid" => $uuid]));
+        return new ServerResponse($this->openVPNAdapter->request("POST", "active/pardon", ["uuid" => $uuid]));
     }
 }

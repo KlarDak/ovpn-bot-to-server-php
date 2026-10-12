@@ -16,7 +16,7 @@ class Server {
     public ?string $subs_url = null;
     public DateTimeImmutable $created_at;
     public string $status;
-    public DateTimeImmutable $disabled_at;
+    public ?DateTimeImmutable $disabled_at = null;
     public bool $is_dropped = false;
 
     function __construct(array $serverData)

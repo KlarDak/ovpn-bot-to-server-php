@@ -8,4 +8,6 @@ interface IDBConnector {
     public function fetchAll(string $query, array $params = []) : array;
 
     public function execute(string $query, array $params = []) : bool;
+
+    public function insert(string $query, array $params = []) : int;
 }
