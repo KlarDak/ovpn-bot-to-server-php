@@ -3,6 +3,7 @@
 namespace CNS\BotToServer\Config;
 
 use CNS\BotToServer\Contracts\OpenVPN\OpenVPNContract;
+use CNS\BotToServer\Manager\Manager;
 use CNS\BotToServer\Types\Env;
 
 final class BTSConfig {
@@ -12,6 +13,7 @@ final class BTSConfig {
     public string $configsDir;
     public string $logsDir;
     public array $contracts;
+    public Manager $manager;
     function __construct(?string $encryptionKey = null, ?string $role = null, ?string $audCode = null, ?string $configsDir = null, ?string $logsDir = null, ?array $contracts = [])
     {
         $this->encryptionKey = $encryptionKey ?? Env::getString("BTS_ENCRYPTION_KEY");

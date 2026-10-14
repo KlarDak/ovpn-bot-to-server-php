@@ -8,3 +8,11 @@ Tests/*
 !Tests/ApiCompatibilityTest.php
 !Tests/ApiIntegrationTest.php
 .vscode/*
+# Isolated PHPUnit unit suite
+!tests/Unit/
+!tests/Unit/**
+
+# MySQL integration suite and private connection settings
+!tests/Integrations/
+!tests/Integrations/**
+.env.integration.local
