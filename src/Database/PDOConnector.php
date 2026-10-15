@@ -78,4 +78,21 @@ class PDOConnector implements IDBConnector {
             throw new \Exception("Query failed: " . $e->getMessage());
         }
     }
+
+    #[Override]
+    public function beginTransaction(): bool
+    {
+        return $this->connection->beginTransaction();
+    }
+
+    public function commit() : bool {
+        return $this->connection->commit();
+    }
+
+    #[Override]
+    public function rollBack(): bool
+    {
+        return $this->connection->commit();
+    }
+
 }

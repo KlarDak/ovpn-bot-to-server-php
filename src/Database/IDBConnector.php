@@ -10,4 +10,10 @@ interface IDBConnector {
     public function execute(string $query, array $params = []) : bool;
 
     public function insert(string $query, array $params = []) : int;
+
+    public function beginTransaction() : bool;
+
+    public function commit() : bool;
+
+    public function rollBack() : bool;
 }

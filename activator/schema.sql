@@ -62,3 +62,23 @@ CREATE TABLE `subs` (
   PRIMARY KEY (`id`)
   UNIQUE KEY `uq_subs_short_code` (`short_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `transactions` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `provider` varchar(32) NOT NULL,
+  `provider_payment_id` varchar(128) DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `duration_days` int unsigned DEFAULT NULL,
+  `currency` varchar(8) NOT NULL DEFAULT 'RUB',
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `description` varchar(255) DEFAULT NULL,
+  `metadata` json DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `paid_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_provider_payment` (`provider`,`provider_payment_id`),
+  KEY `idx_transactions_user_id` (`user_id`),
+  CONSTRAINT `fk_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
