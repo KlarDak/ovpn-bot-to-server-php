@@ -1,82 +1,122 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CNS\OvpnBotToServer\Langs;
 
-class Langs {
-    /**
-     * Path to language template files
-     * 
-     * @var string
-     */
-    protected static string $path = __DIR__ . "/packs/";
-    
-    /**
-     * Language identifier
-     * 
-     * @var string
-     */
-    protected static string $lang_enc;
+use JsonException;
+use RuntimeException;
 
-    /**
-     * Array of dictionary
-     * 
-     * @var array
-     */
-    public static array $dict = [];
+class Langs
+{
+    private string $path;
+    private string $language;
+    private array $dict = [];
 
-    /**
-     * Set default language pack
-     * 
-     * @param string $enc Language identifier
-     * @return boolean
-     */
-    public static function setLanguage(string $enc) : bool {
-        $path = self::$path . $enc . ".json";
+    public function __construct(
+        string $language = 'en',
+        ?string $path = null
+    ) {
+        $this->path = rtrim(
+            $path ?? __DIR__ . '/packs',
+            '/\\'
+        ) . DIRECTORY_SEPARATOR;
 
-        if (file_exists($path)) {
-            self::$lang_enc = $enc;
-            self::$dict = json_decode(file_get_contents($path), true);
-
-            return true;
+        if (!$this->setLanguage($language)) {
+            throw new RuntimeException(
+                "Language pack '{$language}' not found."
+            );
         }
-        else {
+    }
+
+    public function setLanguage(string $enc): bool
+    {
+        // Prevent directory traversal
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $enc)) {
             return false;
         }
-    }
 
-    public static function setMisplacedDir(string $dir) : bool {
-        if (is_dir($dir)) {
-            self::$path = $dir;
-            return true;
+        $file = $this->path . $enc . '.json';
+
+        if (!is_file($file) || !is_readable($file)) {
+            return false;
         }
 
-        return false;
-    }
+        $contents = file_get_contents($file);
 
-    /**
-     * Get expression by its key
-     * 
-     * @param string $ident Ley of expression
-     * @return string
-     */
-    public static function getWords(string $ident) : string {
-        return self::$dict[$ident] ?? "";
-    }
-
-    /**
-     * Get expression with its template-based processing
-     * 
-     * @param string $ident Key of expression
-     * @param array $modificated Array of values for template processing
-     * @return string
-     */
-    public static function getModifiedWords(string $ident, array $modificated) : string {
-        $string = self::getWords($ident);
-
-        foreach ($modificated as $mask => $word) {
-            $string = str_replace($mask, $word, $string);
+        if ($contents === false) {
+            throw new RuntimeException(
+                "Unable to read language pack '{$enc}'."
+            );
         }
 
-        return $string;
+        try {
+            $data = json_decode(
+                $contents,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } catch (JsonException $e) {
+            throw new RuntimeException(
+                "Invalid JSON in language pack '{$enc}'.",
+                previous: $e
+            );
+        }
+
+        if (!is_array($data) || array_is_list($data)) {
+            throw new RuntimeException(
+                "Language pack '{$enc}' must contain a JSON object."
+            );
+        }
+
+        foreach ($data as $key => $value) {
+            if (!is_string($value)) {
+                throw new RuntimeException(
+                    "Invalid translation value for key '{$key}'."
+                );
+            }
+        }
+
+        $this->dict = $data;
+        $this->language = $enc;
+
+        return true;
+    }
+
+    public function setDirectory(string $dir): bool
+    {
+        if (!is_dir($dir) || !is_readable($dir)) {
+            return false;
+        }
+
+        $this->path = rtrim($dir, '/\\')
+            . DIRECTORY_SEPARATOR;
+
+        return true;
+    }
+
+    public function get(
+        string $ident,
+        array $replacements = []
+    ): string {
+        $translation = $this->dict[$ident] ?? '';
+
+        return strtr($translation, $replacements);
+    }
+
+    public function has(string $ident): bool
+    {
+        return array_key_exists($ident, $this->dict);
+    }
+
+    public function getLanguage(): string
+    {
+        return $this->language;
+    }
+
+    public function getDictionary(): array
+    {
+        return $this->dict;
     }
 }

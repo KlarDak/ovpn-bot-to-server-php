@@ -7,7 +7,7 @@ Tests/http/
 Tests/*
 !Tests/ApiCompatibilityTest.php
 !Tests/ApiIntegrationTest.php
-.vscode/*
+.vscode/todos.json
 # Isolated PHPUnit unit suite
 !tests/Unit/
 !tests/Unit/**

@@ -60,7 +60,6 @@ class ServersResource {
 
         foreach ($conditions as $column => $value) {
             if (!in_array($column, $this->allowedFilterBy, true)) {
-                # TODO: Add logger
                 continue;
             }
 
