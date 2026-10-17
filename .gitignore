@@ -16,3 +16,4 @@ Tests/*
 !tests/Integrations/
 !tests/Integrations/**
 .env.integration.local
+.phpunit.result.cache
