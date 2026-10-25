@@ -1,0 +1,194 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+function isAbsolutePath(string $path): bool
+{
+    return preg_match('~^(?:[A-Za-z]:[\\\\/]|[\\\\/])~', $path) === 1;
+}
+
+function projectRoot(): string
+{
+    $autoload = $GLOBALS['_composer_autoload_path'] ?? null;
+    $package = dirname(__DIR__);
+    $start = $autoload ? dirname($autoload) : $package;
+
+    // Ищем проект, в vendor которого установлена библиотека.
+    for ($dir = $start; ; $dir = dirname($dir)) {
+        $manifest = $dir . '/composer.json';
+
+        if (is_file($manifest)) {
+            $config = json_decode(
+                file_get_contents($manifest),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+
+            $vendor = $config['config']['vendor-dir'] ?? 'vendor';
+            $vendor = realpath(
+                isAbsolutePath($vendor) ? $vendor : $dir . '/' . $vendor
+            );
+
+            if ($vendor !== false) {
+                $installed = $autoload
+                    ? realpath(dirname($autoload)) === $vendor
+                    : str_starts_with(
+                        $package . DIRECTORY_SEPARATOR,
+                        $vendor . DIRECTORY_SEPARATOR
+                    );
+
+                if ($installed) {
+                    return $dir;
+                }
+            }
+        }
+
+        if (dirname($dir) === $dir) {
+            break;
+        }
+    }
+
+    // Запуск напрямую из исходников.
+    for ($dir = getcwd(); $dir !== false; $dir = dirname($dir)) {
+        if (is_file($dir . '/composer.json')) {
+            return $dir;
+        }
+
+        if (dirname($dir) === $dir) {
+            break;
+        }
+    }
+
+    throw new RuntimeException(
+        'Не найден корень проекта с composer.json.'
+    );
+}
+
+set_error_handler(static function (int $level, string $message): never {
+    throw new RuntimeException($message);
+});
+
+try {
+    $args = array_slice($argv, 1);
+
+    if (in_array('--help', $args, true)) {
+        echo <<<'HELP'
+Использование:
+  vendor/bin/publish [--force] [--target PATH]
+
+Копирует schema.sql, .temp и .local в папку bts/ проекта.
+
+  --force        Перезаписать существующие файлы.
+  --target PATH  Другая папка назначения.
+                 Относительный путь считается от корня проекта.
+  --help         Показать справку.
+
+HELP;
+        exit(0);
+    }
+
+    $force = false;
+    $target = 'bts';
+
+    while ($args) {
+        $arg = array_shift($args);
+
+        if ($arg === '--force') {
+            $force = true;
+        } elseif ($arg === '--target' || str_starts_with($arg, '--target=')) {
+            $target = $arg === '--target'
+                ? array_shift($args)
+                : substr($arg, 9);
+
+            if ($target === null || $target === '' || str_starts_with($target, '--')) {
+                throw new RuntimeException('--target требует путь к папке.');
+            }
+        } else {
+            throw new RuntimeException('Неизвестный аргумент: ' . $arg);
+        }
+    }
+
+    if (!isAbsolutePath($target)) {
+        $target = projectRoot() . '/' . $target;
+    }
+
+    // Проверяем папку назначения и её родителей.
+    for ($path = $target; ; $path = dirname($path)) {
+        if (is_link($path)) {
+            throw new RuntimeException('Путь содержит символическую ссылку: ' . $path);
+        }
+
+        if (file_exists($path) && !is_dir($path)) {
+            throw new RuntimeException('Вместо папки существует файл: ' . $path);
+        }
+
+        if (dirname($path) === $path) {
+            break;
+        }
+    }
+
+    // Нельзя публиковать поверх исходных файлов библиотеки.
+    if (realpath($target) === realpath(__DIR__)) {
+        throw new RuntimeException(
+            'Папка назначения совпадает с папкой исходных шаблонов. Укажи --target.'
+        );
+    }
+
+    $files = ['schema.sql', '.temp', '.local'];
+
+    // Все проверки выполняем до копирования.
+    foreach ($files as $file) {
+        $source = __DIR__ . '/' . $file;
+        $destination = $target . '/' . $file;
+
+        if (is_link($source) || !is_file($source) || !is_readable($source)) {
+            throw new RuntimeException('Исходный файл отсутствует или недоступен: ' . $source);
+        }
+
+        if (is_link($destination)) {
+            throw new RuntimeException('Вместо файла существует ссылка: ' . $destination);
+        }
+
+        if (file_exists($destination)) {
+            if (!is_file($destination)) {
+                throw new RuntimeException('Вместо файла существует папка: ' . $destination);
+            }
+
+            if (!$force) {
+                throw new RuntimeException(
+                    'Файл уже существует: ' . $destination
+                    . '. Для перезаписи добавь --force.'
+                );
+            }
+        }
+    }
+
+    if (!is_dir($target) && !mkdir($target, 0777, true)) {
+        throw new RuntimeException('Не удалось создать папку: ' . $target);
+    }
+
+    foreach ($files as $file) {
+        $input = fopen(__DIR__ . '/' . $file, 'rb');
+
+        try {
+            // x запрещает перезапись даже при появлении файла после проверки.
+            $output = fopen($target . '/' . $file, $force ? 'wb' : 'xb');
+
+            try {
+                if (stream_copy_to_stream($input, $output) === false) {
+                    throw new RuntimeException('Не удалось скопировать: ' . $file);
+                }
+            } finally {
+                fclose($output);
+            }
+        } finally {
+            fclose($input);
+        }
+    }
+
+    echo 'Файлы скопированы в: ' . $target . PHP_EOL;
+} catch (Throwable $error) {
+    fwrite(STDERR, 'publish: ' . $error->getMessage() . PHP_EOL);
+    exit(1);
+}

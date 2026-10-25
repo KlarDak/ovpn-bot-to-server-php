@@ -2,12 +2,44 @@
 
 namespace CNS\BotToServer\Security;
 
+/**
+ * Provides authenticated encryption and decryption using AES-256-GCM.
+ *
+ * Uses a randomly generated 12-byte initialization vector (IV)
+ * and a 16-byte authentication tag for each encryption operation.
+ *
+ * Encrypted data is encoded in Base64 using the following structure:
+ * IV (12 bytes) + authentication tag (16 bytes) + ciphertext.
+ *
+ * Encryption keys must be 256-bit (32-byte) values encoded in Base64.
+ */
 final class SecretCipher
 {
+    /**
+     * OpenSSL cipher algorithm used for encryption and decryption.
+     */
     private const CIPHER = 'aes-256-gcm';
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private function __construct() {}
 
+    /**
+     * Encrypts plaintext using AES-256-GCM.
+     *
+     * Generates a random initialization vector and returns
+     * the encrypted payload encoded in Base64.
+     *
+     * @param string $plaintext Data to encrypt.
+     * @param string $key Base64-encoded 256-bit encryption key.
+     *
+     * @return string Base64-encoded encrypted payload.
+     *
+     * @throws \InvalidArgumentException If the encryption key is invalid.
+     * @throws \RuntimeException If encryption fails.
+     * @throws \Random\RandomException If secure random byte generation fails.
+     */
     public static function encrypt(string $plaintext, string $key): string
     {
         $key = self::decodeKey($key);
@@ -29,6 +61,23 @@ final class SecretCipher
         return base64_encode($iv . $tag . $ciphertext);
     }
 
+    /**
+     * Decrypts an AES-256-GCM encrypted payload.
+     *
+     * Extracts the initialization vector, authentication tag,
+     * and ciphertext from the Base64-encoded payload.
+     *
+     * Authentication ensures that modified data or an incorrect
+     * encryption key causes decryption to fail.
+     *
+     * @param string $encrypted Base64-encoded encrypted payload.
+     * @param string $key Base64-encoded 256-bit encryption key.
+     *
+     * @return string Decrypted plaintext.
+     *
+     * @throws \InvalidArgumentException If the encryption key is invalid.
+     * @throws \RuntimeException If the payload is invalid or decryption fails.
+     */
     public static function decrypt(string $encrypted, string $key): string
     {
         $key = self::decodeKey($key);
@@ -62,7 +111,11 @@ final class SecretCipher
     }
 
     /**
-     * Generates a random 256-bit encryption key encoded in Base64.
+     * Generates a cryptographically secure 256-bit encryption key.
+     *
+     * @return string Base64-encoded 32-byte encryption key.
+     *
+     * @throws \Random\RandomException If secure random byte generation fails.
      */
     public static function generateKey(): string
     {
@@ -71,6 +124,14 @@ final class SecretCipher
 
     /**
      * Decodes and validates a Base64-encoded encryption key.
+     *
+     * The decoded key must contain exactly 32 bytes (256 bits).
+     *
+     * @param string $key Base64-encoded encryption key.
+     *
+     * @return string Raw 32-byte encryption key.
+     *
+     * @throws \InvalidArgumentException If the key is invalid or has an incorrect length.
      */
     public static function decodeKey(string $key): string
     {

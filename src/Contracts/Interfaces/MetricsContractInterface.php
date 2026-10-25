@@ -2,6 +2,15 @@
 
 namespace CNS\BotToServer\Contracts\Interfaces;
 
-interface MetricsContractInterface {
-    public function metrics() : mixed;
+/**
+ * Defines access to the metrics API of a server contract.
+ */
+interface MetricsContractInterface
+{
+    /**
+     * Returns the metrics handler for the server.
+     *
+     * @return mixed The server metrics handler.
+     */
+    public function metrics(): mixed;
 }

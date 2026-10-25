@@ -7,12 +7,41 @@ use CNS\BotToServer\Manager\Manager;
 use CNS\BotToServer\Types\Env;
 
 final class BTSConfig {
+    /**
+     * Encryption key used to secure sensitive data.
+     */
     public string $encryptionKey;
+
+    /**
+     * Role assigned to the current instance.
+     */
     public string $role;
+
+    /**
+     * Audience identifier used for authentication.
+     */
     public string $audCode;
+
+    /**
+     * Directory containing configuration files.
+     */
     public string $configsDir;
+
+    /**
+     * Directory containing application logs.
+     */
     public string $logsDir;
+
+    /**
+     * Registered contracts.
+     *
+     * @var array<string, mixed>
+     */
     public array $contracts;
+    /**
+     * Manages VPN nodes, users, and access permissions.
+     * @var Manager
+     */
     public Manager $manager;
     function __construct(?string $encryptionKey = null, ?string $role = null, ?string $audCode = null, ?string $configsDir = null, ?string $logsDir = null, ?array $contracts = [])
     {
@@ -25,7 +54,7 @@ final class BTSConfig {
             "openvpn" => OpenVPNContract::class
         ], $contracts ?? []);
 
-        foreach (['encryptionKey', 'role', 'audCode', 'configsDir', 'logsDir'] as $property) {
+        foreach (['encryptionKey', 'role', 'audCode', 'configsDir'] as $property) {
             if ($this->$property === '') {
                 throw new \InvalidArgumentException(
                     "BTS configuration '{$property}' cannot be empty."

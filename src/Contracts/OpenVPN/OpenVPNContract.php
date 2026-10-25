@@ -10,11 +10,12 @@ use CNS\BotToServer\Contracts\Interfaces\ActiveContractInterface;
 use CNS\BotToServer\Contracts\Interfaces\AccessContractInterface;
 use CNS\BotToServer\Contracts\Interfaces\MetricsContractInterface;
 use CNS\BotToServer\Contracts\Interfaces\SubsContractInterface;
+use CNS\BotToServer\Contracts\Interfaces\VPNNodeContractInterface;
 use CNS\BotToServer\Contracts\OpenVPN\Security\JWTCipher;
 use CNS\BotToServer\Security\SecretCipher;
 use CNS\BotToServer\Types\Server;
 
-class OpenVPNContract implements AccessContractInterface, ActiveContractInterface, MetricsContractInterface, SubsContractInterface {
+class OpenVPNContract implements AccessContractInterface, ActiveContractInterface, MetricsContractInterface, SubsContractInterface, VPNNodeContractInterface {
     use CheckContractTrait;
     private OpenVPNFuncAdapter $openVPNFuncAdapter;
     private string $subs_url;
