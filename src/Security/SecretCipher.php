@@ -133,7 +133,7 @@ final class SecretCipher
      *
      * @throws \InvalidArgumentException If the key is invalid or has an incorrect length.
      */
-    public static function decodeKey(string $key): string
+    private static function decodeKey(string $key): string
     {
         $decoded = base64_decode($key, true);
 
