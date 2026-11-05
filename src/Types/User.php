@@ -1,89 +1,76 @@
 <?php
 
-namespace CNS\OvpnBotToServer\Types;
+namespace CNS\BotToServer\Types;
 
-class User {
-    /**
-     * Record ID
-     * 
-     * @var int
-     */
+/**
+ * Represents a user record.
+ *
+ * Contains user identification, profile information,
+ * subscription expiration and payment dates, activity timestamps,
+ * and account activation and deletion states.
+ */
+final class User
+{
+    /** @var int Internal user ID. */
     public int $id;
-    
-    /**
-     * UserID of user in Telegram
-     * 
-     * @var string
-     */
-    public string $user_id;
 
-    /**
-     * Username of user in Telegram
-     * 
-     * @var string
-     */
-    public string $username;
+    /** @var int|null Telegram user ID, if available. */
+    public ?int $telegram_id = null;
 
-    /**
-     * Language of user
-     * 
-     * @var string
-     */
+    /** @var string|null User email address. */
+    public ?string $email = null;
+
+    /** @var string|null Optional username. */
+    public ?string $username = null;
+
+    /** @var string User's preferred language. */
     public string $language;
 
-    /**
-     * User's config count
-     * 
-     * @var int
-     */
-    public int $configs_count;
+    /** @var \DateTimeImmutable User registration date and time. */
+    public \DateTimeImmutable $created_at;
+
+    /** @var \DateTimeImmutable|null Date and time of the user's last activity. */
+    public ?\DateTimeImmutable $last_activity_at = null;
+
+    /** @var \DateTimeImmutable|null Subscription expiration date and time. */
+    public ?\DateTimeImmutable $expired_at = null;
+
+    /** @var \DateTimeImmutable|null Date and time of the user's last payment. */
+    public ?\DateTimeImmutable $last_payment_at = null;
+
+    /** @var bool Whether the user account is currently enabled. */
+    public bool $is_active = true;
+
+    /** @var \DateTimeImmutable|null Date and time when the user was disabled. */
+    public ?\DateTimeImmutable $disabled_at = null;
+
+    /** @var bool Whether the user has been soft-deleted. */
+    public bool $is_dropped = false;
 
     /**
-     * Date creation of user
-     * 
-     * @var string
+     * Initializes a user instance from a database record.
+     *
+     * Maps database fields to object properties, converts numeric
+     * and boolean values to their corresponding PHP types,
+     * and parses timestamps into DateTimeImmutable instances.
+     *
+     * @param array<string, mixed> $userData Associative array containing user data.
+     *
+     * @throws \Exception If a timestamp cannot be parsed.
      */
-    public string $created_at;
-
-    /**
-     * Date expiration of user
-     * 
-     * @var string|null
-     */
-    public string|null $expired_at;
-
-    /**
-     * Last payment of user
-     * 
-     * @var string|null
-     */
-    public string|null $last_payment_at;
-
-    /**
-     * Is user active
-     * 
-     * @var bool
-     */
-    public bool $is_active;
-
-    /**
-     * Account deactivation date
-     * 
-     * @var string|null
-     */
-    public string|null $disabled_at;
-
     function __construct(array $userData)
     {
-        $this->id = $userData['id'];
-        $this->user_id = $userData['user_id'];
-        $this->username = $userData['username'];
-        $this->language = $userData['language'];
-        $this->configs_count = $userData['configs_count'];
-        $this->created_at = $userData['created_at'];
-        $this->expired_at = $userData['expired_at'];
-        $this->last_payment_at = $userData['last_payment_at'];
-        $this->is_active = $userData['is_active'];
-        $this->disabled_at = $userData['disabled_at'];
+        $this->id = (int) $userData['id']; 
+        $this->telegram_id = isset($userData['telegram_id']) ? (int) $userData['telegram_id'] : null;
+        $this->email = isset($userData['email']) ? (string) $userData['email'] : null;
+        $this->username = isset($userData['username']) ? (string) $userData['username'] : null;
+        $this->language = (string) $userData['language'];
+        $this->created_at = new \DateTimeImmutable($userData['created_at']);
+        $this->last_activity_at = isset($userData['last_activity_at']) ? new \DateTimeImmutable($userData['last_activity_at']) : null;
+        $this->expired_at = ($userData['expired_at'] !== null) ? new \DateTimeImmutable($userData['expired_at']) : null;
+        $this->last_payment_at = ($userData['last_payment_at'] !== null) ? new \DateTimeImmutable($userData['last_payment_at']) : null;
+        $this->is_active = (bool) $userData['is_active'];
+        $this->disabled_at = ($userData['disabled_at'] !== null) ? new \DateTimeImmutable($userData['disabled_at']) : null;
+        $this->is_dropped = (bool) $userData['is_dropped']; 
     }
 }

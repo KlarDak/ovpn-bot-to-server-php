@@ -7,3 +7,13 @@ Tests/http/
 Tests/*
 !Tests/ApiCompatibilityTest.php
 !Tests/ApiIntegrationTest.php
+.vscode/todos.json
+# Isolated PHPUnit unit suite
+!tests/Unit/
+!tests/Unit/**
+
+# MySQL integration suite and private connection settings
+!tests/Integrations/
+!tests/Integrations/**
+.env.integration.local
+.phpunit.result.cache

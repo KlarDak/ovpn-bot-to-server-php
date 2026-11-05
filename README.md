@@ -1,34 +1,44 @@
-# OVPN-bot-to-server-PHP v2.1.9
+# OVPN-Bot-To-Server
 
-PHP-библиотека для связи между Telegram-ботом и OpenVPN Controller API `v2.1.9`.
+Библиотека для коммуникации между серверами на базе протоколов VPN и ботом / панелью управления. 
 
-![PHP Version](https://img.shields.io/badge/PHP-8.1+-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Beta-yellow)
+## Описание
 
-## ❗️ Данный код НЕ является библиотекой общего использования
-Если вы случайно наткнулись на этот код, пропустите данный репозиторий - он не предназначен для общего использования, является исключительно презентационным проектом.
+**BTS (Bot To Server)** — PHP-библиотека для управления пользователями, VPN-доступами, подписками и удалёнными серверами через единый программный интерфейс.
 
-## ❗️ This code is NOT a general-purpose library.
-If you have come across this code by accident, please skip this repository — it is not intended for public use and exists solely as a presentation project.
+Библиотека объединяет работу с базой данных и API удалённых серверов, позволяя создавать и изменять пользователей, управлять их доступами, получать данные о серверах и выполнять операции через серверные контракты.
+
+### Расширяемость
+
+BTS построена на модульной архитектуре и позволяет заменять стандартные компоненты собственными реализациями.
+
+**По умолчанию предусмотрены:**
+
+- *MySQL через PDO* — для работы с базой данных.
+
+- *GuzzleHTTP* — для выполнения HTTP-запросов.
+
+- *Серверные контракты* — для взаимодействия с поддерживаемыми VPN-протоколами и собственными API.
+
+Разработчик может реализовать собственный коннектор базы данных, HTTP-клиент или серверный контракт, используя соответствующие интерфейсы библиотеки.
 
 ## Требования
 
-Для работы библиотеки, должно быть установлено следующее:
+Для использования библиотеки требуется следующее:
 
-- PHP 8.1+
-- MySQL 8.0+
-- Redis
-- cURL
-- ``composer`` или ``git``
+- PHP 8.2+
+- Composer 2.x
+- ext-openssl
+- ext-json
+- MySQL 8.0+ _(при взаимодействии с базой данных через PDOConnector)_
+- ext-pdo _(при взаимодействии с базой данных через PDOConnector)_
+- ext-pdo_mysql _(при взаимодействии с базой данных через PDOConnector)_
+
+Дополнительные зависимости библиотека скачивает автоматически при установке.
 
 ## Установка
 
-Библиотека предназначена для работы с PHP через менеджер **composer** (без обработчика для бота) или в варианте **клонирования репозитория** (рекомендуется для работы со встроенным файлом-обработчиком для бота)
-
-### Установка через composer
-
-Для установки библиотеки, создайте файл ``composer.json`` и добавьте следующее:
+Для установки библиотеки, создайте файл ``composer.json`` и добавьте в него следующее содержимое:
 
 ```json
 {
@@ -39,206 +49,265 @@ If you have come across this code by accident, please skip this repository — i
         }
     ],
     "require": {
-        "cns/ovpn-bot-to-server-php": "dev-dev"
+        "cns/ovpn-bot-to-server-php": "dev-main"
     }
 }
 ```
-
-После чего введите команду:
+После чего установите библиотеку:
 
 ```bash
 composer update
 ```
 
-> На момент версии **dev-2.1** библиотека доступна только в версии **dev**.
+## Подготовка окружения
 
-### Установка через git
-
-Для установки через ``git``, используйте команду:
+После установки библиотеки через Composer выполните:
 
 ```bash
-git clone -b main https://github.com/KlarDak/ovpn-bot-to-server-php.git
+vendor/bin/publish
 ```
 
-## Настройка работы библиотеки
-
-До начала работы, убедитесь в установленных на сервере реляционной базы данных и сервера Redis.
-
-> На момент версии ``dev-2.1`` доступен адаптер для работы только с MySQL через драйвер PDO.
-
-Убедитесь, что вы настроили файл-окружения ``.env``. Его шаблон находится в файле ``.env.temp``.
-
-### Важное про настройку окружения для связи с серверами
-
-У каждого сервера имеются свои **секретные ключи** для JWT-токенов, а также свои **индекс** и, естественно, **адрес**. Перед запуском, убедитесь, что вы создали связки значений для серверов.
-
-**Пример связок:**
+Команда создаст в корне вашего проекта папку bts/ и скопирует в неё файлы из библиотеки:
 
 ```text
-# Адрес дочернего сервера
-RU_SERVER_ADDRESS=localhost:3000
-
-# Индекс дочернего сервера
-RU_SERVER_INDEX=RU_SRV_1
-
-# Секретный ключ дочернего сервера
-RU_SECRET_KEY=secret_do_not_push_this_on_the_github
+bts/
+├── schema.sql
+├── .temp
+└── .local
 ```
 
-Где ``RU`` - буквенное обозначение сервера для работы со связкой в библиотеке. 
+Исходные файлы библиотеки останутся без изменений. Команда только копирует файлы — импортировать schema.sql в базу данных нужно самостоятельно.
 
-**Важно:** у каждого сервера, вне зависимости от их локации, должно быть *уникальное буквенное обозначение*.
-
-### Настройка пользователя базы данных
-
-Изначально функциональный набор библиотеки предполагает схему ``CREATE-READ-UPDATE``. Опция ``DELETE`` **не используется** для удаления строк - вместо этого используется отдельное поле ``is_dropped``, скрывающая строки из общей выборки.
-
-### Настройка баз данных
-
-После подготовки файла ``.env``, нужно произвести подготовку базы данных для работы.
-
-Для этого перейдите в директорию ``helpers`` и запустите файл ``tablesInstaller.php``. Настройка будет произведена автоматически.
-
-> На момент версии ``dev-2.1``, файл работает **только** с адаптером PDO.
+Если файлы назначения уже существуют, публикация остановится. Для их перезаписи используйте --force:
 
 ```bash
-cd helpers/
-php tablesInstaller.php
+vendor/bin/publish --force
 ```
 
-**Важно:** так как в этом случае выполняется создание таблиц, необходим пользователь в базе данных с привилегией ``CREATE``.
+Перезапись удалит ваши изменения в этих файлах.
 
-## Работа с библиотекой
+Чтобы выбрать другую папку назначения, передайте ``--target``:
 
-Библиотека создана для работы с базой данных пользователей и их конфиг-файлов, а также для связи по API между сервером бота и серверами OpenVPN.
+```bash
+vendor/bin/publish --target=config/bts
+```
 
-### Подготовка к работе
+Относительный путь считается от корня проекта. Также можно указать абсолютный путь.
 
-Для работы классов библиотеки, создайте класс с функциями для работы с базой данных. На данный момент в библиотеке реализован класс, совместимый с драйвером ``PDO`` - ``PDOConnector``.
+Справка по команде:
+
+```bash
+vendor/bin/publish --help
+```
+
+После выполнения команды, заполните файлы, согласно указанным комментариям, и импортируйте файл ``.sql`` в выбранную вами базу данных.
+
+**Библиотека готова к использованию!**
+
+## Быстрый старт
+
+Для начала работы библиотеки, создайте класс для подключения к базе данных, определитесь с HTTP-клиентом и создайте сам класс ``BotToServer``:
+
+Пример с использованием встроенных коннектора к базе данных ``PDOConnector`` и HTTP-клиента ``GuzzleHTTP``:
 
 ```php
 <?php
 
-use CNS\OvpnBotToServer\Databases\PDOConnector;
+require __DIR__ . "/vendor/autoload.php";
 
-$db = new PDOConnector($hostname, $port, $username, $password, $dbname);
+use CNS\BotToServer\Databases\PDOConnector;
+use CNS\BotToServer\Http\Drivers\GuzzleHttpClient;
+use CNS\BotToServer\BotToServer;
+use CNS\BotToServer\Types\Env;
+use Dotenv\Dotenv;
 
+Dotenv::createImmutable(__DIR__)->load();
+
+$connector = new PDOConnector(
+    hostname: Env::getString("DB_HOSTNAME"),
+    port: Env::getInt("DB_PORT"),
+    username: Env::getString("DB_USERNAME"),
+    password: Env::getString("DB_PASSWORD"),
+    dbname: Env::getString("DB_DATABASE")
+);
+
+$bts = new BotToServer(
+    database: $connector,
+    http: GuzzleHttpClient::class
+);
+
+...
 ```
 
-**Важно:** допустимо создание адаптеров и для других драйверов или баз данных. Для этого создайте класс, совместимый с функциями интерфейса ``IDBConnector``.
+### Изменение вводных констант
 
-### BotToServer
+При необходимости, вы можете обойтись без ``.env``-файла, и создавать все необходимые константы окружения через встроенный класс ``BTSConfig``.
 
-Основной класс для работы с библиотекой. Используется как для связи с базой данных, так и для запросов по API.
-
-Аргументом передаётся подключение к базе данных, созданное шагом ранее.
+Пример создания класса библиотеки из образца выше, но без использования заранее созданного файла ``.env``:
 
 ```php
 <?php
 
-use CNS\OvpnBotToServer\BotToServer;
-use CNS\OvpnBotToServer\Databases\PDOConnector;
+require __DIR__ . "/vendor/autoload.php";
 
-$db = new PDOConnector($hostname, $port, $username, $password, $dbname);
+use CNS\BotToServer\Databases\PDOConnector;
+use CNS\BotToServer\Http\Drivers\GuzzleHttpClient;
+use CNS\BotToServer\BotToServer;
+use CNS\BotToServer\Types\Env;
+use CNS\BotToServer\Config\BTSConfig;
 
-$botToServer = new BotToServer($db);
+$btsConfig = new BTSConfig(
+    encryptionKey: "EXAMPLE_OF_ENCRYPTION_TOKEN",
+    role: "admin",
+    audCode: "test_01",
+    configsDir: __DIR__ . "/users",
+    logsDir: __DIR__ . "/logs",
+    contracts: [
+        "openvpn" => CNS\BotToServer\Contracts\OpenVPN\OpenVPNContract::class,
+        "xray" => CNS\BotToServer\Contracts\Xray\XrayContract::class
+    ]
+);
+
+$connector = new PDOConnector(
+    hostname: "localhost",
+    port: 3306,
+    username: "root",
+    password: "root",
+    dbname: "unlimitdb"
+);
+
+$bts = new BotToServer(
+    database: $connector,
+    http: GuzzleHttpClient::class,
+    btsConfig: $btsConfig
+);
+
+...
 ```
 
-### BTSStatic
+> Более подробное описание ``BTSConfig`` описано в файле документации "[Создание конфигурации библиотеки](docs/btsconfig.md)".
 
-> Доступен для работы с версии **dev-2.3**
+## Использование библиотеки
 
-Статический варианта класса **BotToServer**. Обладает тем же набором методов, кроме отсутствия ``__construct`` и наличия метода ``setDBConnection($databaseConnector)`` - метода для установки объекта класса подключения к базе данных.
+Экземпляр ``BotToServer`` предоставляет единый интерфейс для работы с пользователями, доступами, серверами, подписками и транзакциями.
 
 ```php
-<?php
+use CNS\BotToServer\Types\UserType;
 
-use CNS\OvpnBotToServer\BotToServer;
-use CNS\OvpnBotToServer\Databases\PDOConnector;
+$user = $bts->user(770, UserType::TELEGRAM)->get();
 
-$db = new PDOConnector($hostname, $port, $username, $password, $dbname);
-
-BTSStatic::setDBConnection($db);
+// Вернёт свойство созданного класса User со значением ID.
+echo $user->id;
 ```
-
-### Примеры использования
-
-Для получения данных пользователя, используйте метод ``user()`` с ``$user_id`` - User ID пользователя:
 
 ```php
-use CNS\OvpnBotToServer\BotToServer;
+$access = $bts->access("0bc4734c-ca6c-11f1-a43a-38f3ab6d0b2a")->get();
 
-$user = $botToServer->user(1);
-// или
-$user = BTSStatic::user(1);
-
-// Получить username
-print($user->getUserByID()->username);
-
-// Обновить username
-print($user->updateUsername("new_username"));
+// Вернёт свойство созданного класса Access со значением UUID.
+echo $access->uuid;
 ```
-
-Для получения данных конфиг-файла, используйте метод ``config()`` с аргументом ``$uuid`` - уникальным идентификатором конфиг-файла:
 
 ```php
-use CNS\OvpnBotToServer\BotToServer;
+$server = $bts->server("test_02")->info();
 
-$config = $botToServer->config("uuid");
-// или
-$config = BTSStatic::config("uuid");
-
-// Получить имя конфиг-файла
-print($config->getConfig()->config_name);
-
-// Обновить username
-print($config->updateConfigName("new name"));
+// Вернёт дамп созданного класса Server.
+var_dump($server);
 ```
-
-Для отправления запросов по API, используйте метод ``apiClient()`` с аргументом ``$server_id`` - идентификатором сервера, указанным в ``.env``-файле.
 
 ```php
-use CNS\OvpnBotToServer\BotToServer;
+$transaction = $bts->transaction()->get(112);
 
-// Обращаемся к RU-серверу, указанному в .env-файле
-$apiServer = $botToServer->apiClient("RU");
-// или
-$apiServer = BTSStatic::apiClient("RU");
-
-// Получить данные конфиг-файла с сервера
-var_dump($apiServer->getConfig("uuid"));
-
-// Создадим новый конфиг-файл с типом "user" и временем работы 100 секунд
-var_dump($apiServer->postConfig("uuid", 100, "user"));
+// Вернёт дамп созданного класса Transaction.
+var_dump($transaction);
 ```
-
-Для блокировки или разблокировки всех конфиг-файлов пользователя разом используйте метод ``configs()`` с аргументом ``$user_id`` - User ID пользователя.
 
 ```php
-use CNS\OvpnBotToServer\BotToServer;
+$newServer = $bts->server()->create(
+    code: "test_03",
+    name: "test",
+    host: "192.168.1.11",
+    port: 3000,
+    api_endpoint: "/api",
+    encrypt_secret_code: "ENCRYPT_CODE",
+    type: "openvpn"
+);
 
-// Обращаемся к RU-серверу, указанному в .env-файле
-$configs = $botToServer->configs(1);
-// или
-$configs = BTSStatic::configs(1);
-
-// Обновит данные о блокировке всех конфиг-файлов пользователя
-print($configs->blockConfigsByUserID());
-
-// Обновит данные о разблокировке всех конфиг-файлов пользователя
-print($configs->pardonConfigsByUserID());
+// Вернёт ID новой записи в базе данных 
+echo $newServer;
 ```
 
-### Документация
+```php
+$access = $bts->server("test_03")->contract();
 
-Более подробная документация ко всем методам, свойствам и ошибкам находится в директории ``docs/``.
+// Вернёт результат создания конфигурации на сервере ответом Boolean
+echo $access->access()->create(uuid: "0bc4734c-ca6c-11f1-a43a-38f3ab6d0b2a", type: "user", ttl: 3600);
+```
 
-**Подробный список:**
+Подробнее про методы Resources указано в файле "[Список доступных методов библиотеки](docs/api/README.md)".
 
-- [Доступные адаптеры](docs/Adapters.md)
-- [Доступные сервисы для связи с API](docs/Services.md)
-- [Доступные типы данных](docs/Types.md)
-- [Доступные ошибки](docs/Exceptions.md)
-- [Утилиты и для чего они нужны](docs/Utils.md)
-- [Скрипты для настройки баз данных и cron-работы](docs/Helpers.md)
-- [Языковые пакеты для бота](docs/Langs.md)
+Подробнее про возвращаемые типы методов описано в файле "[Доступные типы](docs/types.md)".
+
+## Архитектура
+
+BTS построена на модульной архитектуре с разделением ответственности между компонентами. Центральной точкой взаимодействия является класс `BotToServer`, предоставляющий единый интерфейс для работы с библиотекой.
+
+Основные компоненты:
+
+- **BotToServer** — основной класс библиотеки, предоставляющий доступ к ресурсам и серверным контрактам.
+- **Resources** — классы для управления пользователями, VPN-доступами, серверами, подписками и транзакциями.
+- **Contracts** — адаптеры для взаимодействия с API удалённых серверов. Позволяют реализовать поддержку собственных протоколов и серверных решений.
+- **Database Connectors** — компоненты взаимодействия с базой данных через интерфейс `IDBConnector`. По умолчанию предусмотрен `PDOConnector` для MySQL.
+- **HTTP Clients** — компоненты для отправки HTTP-запросов через интерфейс `HttpClientInterface`. По умолчанию используется GuzzleHTTP.
+- **BTSConfig** — объект конфигурации библиотеки, содержащий настройки и соответствия серверных контрактов.
+
+Ресурсы выполняют операции с данными, а серверные контракты обеспечивают взаимодействие с удалёнными API. Благодаря разделению этих компонентов библиотеку можно расширять без изменения её основного кода.
+
+Подробнее об устройстве и расширении BTS см. [Архитектура библиотеки](docs/architecture.md).
+
+Подробнее про все интерфейсы BTS см. [Интерфейсы библиотеки BTS](docs/interfaces/README.md)
+
+## Тестирование
+
+Библиотека полностью покрыта тестами. Чтобы их запустить, введите в консоли команду:
+
+```bash
+composer test:unit
+```
+
+### Интеграционные тесты
+
+Для тестирования библиотеки с работой на тестовой базе данных, необходимо подготовить окружение заранее, так как для этого также используется отдельный конфигурационный файл.
+
+Создайте файл ``.env.integration.local`` и заполните его следующим содержимым:
+
+```text
+# Говорит системе провести интеграционное тестирование. Замените на 0, чтобы отключить режим тестирования
+BTS_RUN_DB_TESTS=1
+# Хост базы данных
+BTS_TEST_DB_HOST=
+# Порт базы данных
+BTS_TEST_DB_PORT=
+# Имя базы данных
+BTS_TEST_DB_NAME=unlimitdb_test
+# Имя пользователя
+BTS_TEST_DB_USER=
+# Пароль
+BTS_TEST_DB_PASSWORD=
+```
+
+> **Важно:** проводите тестирование *исключительно* на базе тестовой базы данных. Не используйте для этих целей основную базу данных для предотвращения возможного повреждения информации в таблицах.
+
+После создания файла и тестовой базы данных, запустите интеграционные тесты:
+
+```bash
+composer test:integration
+```
+
+### Запуск одновременного тестирования
+
+Для проведения основных тестов методов библиотеки и интеграционного тестирования одновременно, запустите общее тестирование:
+
+```bash
+composer test:all
+```
+

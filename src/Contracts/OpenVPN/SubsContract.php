@@ -1,0 +1,24 @@
+<?php
+
+namespace CNS\BotToServer\Contracts\OpenVPN;
+
+use CNS\BotToServer\Database\IDBConnector;
+use CNS\BotToServer\Resources\SubsResource;
+
+class SubsContract {
+    private SubsResource $subsResource;
+    function __construct(IDBConnector $dbConnector, private string $subs_url) {
+        $this->subsResource = new SubsResource($dbConnector);
+    }
+
+    public function getSubsLink(string $short_code) : string|null {
+        $sub = $this->subsResource->get($short_code);
+
+        return ($sub) ? ($this->subs_url . "/" . $sub->short_code) : null;
+    }
+
+    public function createSubsLink(string $short_code, int $server_id, int $access_id) : string|null {
+        $sub = $this->subsResource->create($short_code, $server_id, $access_id);
+        return ($sub) ? $this->subs_url . "/" . $short_code : null;
+    }
+}

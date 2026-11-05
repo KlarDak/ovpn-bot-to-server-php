@@ -1,125 +1,132 @@
 <?php
 
-namespace CNS\OvpnBotToServer\Types;
+namespace CNS\BotToServer\Types;
 
-use CNS\OvpnBotToServer\Exceptions\AppException;
-use RuntimeException;
-
-class Env
+/**
+ * Provides typed access to environment variables.
+ *
+ * Reads values from $_ENV or the process environment
+ * and converts them to the requested PHP type.
+ *
+ * Supports string, integer, float, and boolean values.
+ */
+final class Env
 {
     /**
-     * Filter keys and output variable values
-     * 
-     * @param string $key Key of variable
-     * @return string
-     * @throws AppException 
+     * Retrieves an environment variable as a string.
+     *
+     * Checks $_ENV first, then falls back to getenv().
+     *
+     * @param string $key Environment variable name.
+     * @param string $default Default value if the variable is unavailable.
+     *
+     * @return string Environment variable value.
      */
-    public static function get(string $key) : string {
-        $value = $_ENV[$key];
+    public static function getString(string $key, string $default = ''): string
+    {
+        $value = $_ENV[$key] ?? getenv($key);
 
-        if ($value === null || $value === '') {
-            throw new AppException("An error with value of this keys: $key");
+        return $value === false ? $default : (string) $value;
+    }
+
+    /**
+     * Retrieves an environment variable as an integer.
+     *
+     * Returns the default value if the variable is empty
+     * or unavailable.
+     *
+     * @param string $key Environment variable name.
+     * @param int $default Default integer value.
+     *
+     * @return int Parsed integer value.
+     *
+     * @throws \UnexpectedValueException If the value is not a valid integer.
+     */
+    public static function getInt(string $key, int $default = 0): int
+    {
+        $value = self::getString($key);
+
+        if ($value === '') {
+            return $default;
         }
-        return $value;
-    }
-    
-    /**
-     * Return value of Telegram token
-     * 
-     * @return string
-     */
-    public static function getToken() : string {
-        return self::get("TOKEN");
+
+        $result = filter_var($value, FILTER_VALIDATE_INT);
+
+        if ($result === false) {
+            throw new \UnexpectedValueException(
+                "Environment variable '$key' must be an integer."
+            );
+        }
+
+        return $result;
     }
 
     /**
-     * Return secret key of server
-     * 
-     * @return string
+     * Retrieves an environment variable as a floating-point number.
+     *
+     * Returns the default value if the variable is empty
+     * or unavailable.
+     *
+     * @param string $key Environment variable name.
+     * @param float $default Default floating-point value.
+     *
+     * @return float Parsed floating-point value.
+     *
+     * @throws \UnexpectedValueException If the value is not numeric.
      */
-    public static function getSecretToken() : string {
-        return self::get("SECRET_KEY");
+    public static function getFloat(string $key, float $default = 0.0): float
+    {
+        $value = self::getString($key);
+
+        if ($value === '') {
+            return $default;
+        }
+
+        if (!is_numeric($value)) {
+            throw new \UnexpectedValueException(
+                "Environment variable '$key' must be numeric."
+            );
+        }
+
+        return (float) $value;
     }
 
     /**
-     * Return path of configs dir
-     * 
-     * @return string
+     * Retrieves an environment variable as a boolean.
+     *
+     * Accepts boolean representations recognized by PHP,
+     * including true, false, yes, no, on, off, 1, and 0.
+     *
+     * Returns the default value if the variable is empty
+     * or unavailable.
+     *
+     * @param string $key Environment variable name.
+     * @param bool $default Default boolean value.
+     *
+     * @return bool Parsed boolean value.
+     *
+     * @throws \UnexpectedValueException If the value cannot be interpreted as boolean.
      */
-    public static function getConfigsDir() : string {
-        return self::get("CONFIGS_DIR");
-    }
+    public static function getBool(string $key, bool $default = false): bool
+    {
+        $value = self::getString($key);
 
-    /**
-     * Return Databases key
-     * 
-     * @return object
-     */
-    public static function getDatabaseKeys(): object {
-        return (object) [
-            "hostname" => self::get("DB_HOSTNAME"),
-            "port" => self::get("DB_PORT"),
-            "username" => self::get("DB_USERNAME"),
-            "password" => self::get("DB_PASSWORD"),
-            "dbname" => self::get("DB_DATABASE"),
-        ];
-    }
+        if ($value === '') {
+            return $default;
+        }
 
-    /**
-     * Return selected server address
-     * 
-     * @param string $id_name Identify of selected server
-     * @return string 
-     */
-    public static function getAddressByID($id_name): string {
-        return self::get($id_name . "_SERVER_ADDRESS");
-    }
+        $result = filter_var(
+            $value,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
 
-    /**
-     * Return index of selected server
-     * 
-     * @param string $id_name Identify of selected server
-     * @return string
-     */
-    public static function getIndexByID($id_name): string {
-        return self::get($id_name . "_SERVER_INDEX");
-    }
+        if ($result === null) {
+            throw new \UnexpectedValueException(
+                "Environment variable '$key' must be boolean."
+            );
+        }
 
-    /**
-     * Return secret key of server
-     * 
-     * @param string $id_name Identify of selected server
-     * @return string
-     */
-    public static function getSecretKeyByID($id_name): string {
-        return self::get($id_name . "_SECRET_KEY");
-    }
-
-    /**
-     * Return index of server
-     * 
-     * @return string
-     */
-    public static function getSubIndex(): string {
-        return self::get("SUB_INDEX");
-    }
-
-    /**
-     * Return Redis keys
-     * 
-     * @return object
-     */
-    public static function getRedisKeys(): object {
-        return (object) [
-            "hostname" => self::get("REDIS_HOSTNAME"),
-            "port" => self::get("REDIS_PORT")
-        ];
-    }
-
-    /**
-     * Not used now
-     */
-    public static function getRequiredServers() : array {
-        return explode(",", self::get("REQUIRED_SERVERS"));
+        return $result;
     }
 }

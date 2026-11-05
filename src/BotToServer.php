@@ -1,117 +1,142 @@
 <?php
 
-namespace CNS\OvpnBotToServer;
+namespace CNS\BotToServer;
 
-use CNS\OvpnBotToServer\Databases\IDBConnector;
+use CNS\BotToServer\Config\BTSConfig;
+use CNS\BotToServer\Database\IDBConnector;
+use CNS\BotToServer\Http\Interfaces\HttpClientInterface;
+use CNS\BotToServer\Resources\AccessesResource;
+use CNS\BotToServer\Resources\AccessResource;
+use CNS\BotToServer\Resources\ServerResource;
+use CNS\BotToServer\Resources\ServersResource;
+use CNS\BotToServer\Resources\SubsResource;
+use CNS\BotToServer\Resources\TransactionResource;
+use CNS\BotToServer\Resources\UserResource;
+use CNS\BotToServer\Resources\UsersResource;
+use CNS\BotToServer\Types\UserType;
 
+/**
+ * Main entry point and facade for the BTS library.
+ *
+ * Provides access to user, VPN access, subscription, server,
+ * and transaction resources through a unified interface.
+ *
+ * Manages shared dependencies, including the database connector,
+ * HTTP client, and library configuration.
+ */
 class BotToServer
 {
-    /**
-     * Database object variable
-     * 
-     * @var IDBConnector
-     */
-    private IDBConnector $databaseConnector;
-    /**
-     * UserID of user in Telegram
-     * 
-     * @var int
-     */
-    private int $user_id;
+    private IDBConnector $dbConnector;
+    private string|HttpClientInterface $httpClient;
+    private BTSConfig $btsConfig;
 
-    function __construct(IDBConnector $databaseConnector, ?int $user_id = null)
+    // private ManagerInterface $manager;
+
+    /**
+     * Initializes the BTS library with the required dependencies.
+     *
+     * Uses the default BTSConfig instance when no custom
+     * configuration is provided.
+     *
+     * @param IDBConnector $database Database connector instance.
+     * @param string|HttpClientInterface $http HTTP client instance or class name.
+     * @param BTSConfig|null $btsConfig Optional library configuration.
+     */
+    function __construct(
+        IDBConnector $database,
+        string|HttpClientInterface $http,
+        ?BTSConfig $btsConfig = null,
+        // ?ManagerInterface $manager = null
+    )
     {
-        $this->databaseConnector = $databaseConnector;
-        $this->user_id = $user_id ?? 0;
+        $this->dbConnector = $database;
+        $this->httpClient = $http;
+        $this->btsConfig = $btsConfig ?? new BTSConfig();
+
+        // $this->manager = $manager ?? new Manager($this);
     }
 
     /**
-     * Set new userID
-     * 
-     * @param int $user_id UserID of user in Telegram
-     * 
-     * @return void
+     * Returns a resource for managing a specific user.
+     *
+     * @param int|string $userIdentifier User identifier.
+     * @param UserType $userType Type of user identifier.
+     *
+     * @return UserResource User management resource.
      */
-    public function setUserID(int $user_id) : void {
-        $this->user_id = $user_id;
+    public function user(int|string $userIdentifier, UserType $userType) : UserResource {
+        return new UserResource($this->dbConnector, $userIdentifier, $userType);
     }
 
     /**
-     * Getter of UserID
-     * 
-     * @return int
+     * Returns a resource for querying user collections.
+     *
+     * @return UsersResource Users collection resource.
      */
-    public function getUserID() : int {
-        return $this->user_id;
+    public function users() : UsersResource {
+        return new UsersResource($this->dbConnector);
     }
 
     /**
-     * Get object of class usersAdapter
-     * 
-     * @param int $user_id UserID of user
-     * @return Adapters\userAdapter
+     * Returns a resource for managing a specific VPN access.
+     *
+     * @param string $uuid Unique access identifier.
+     *
+     * @return AccessResource Access management resource.
      */
-    public function user(int $user_id) : Adapters\userAdapter
-    {
-        return new Adapters\userAdapter($this->databaseConnector, $user_id ?? $this->user_id);
+    public function access(string $uuid) : AccessResource {
+        return new AccessResource($this->dbConnector, $uuid);
     }
 
     /**
-     * Get object of class configAdapter
-     * 
-     * @param string $uuid UUID identifier
-     * @return Adapters\configAdapter
+     * Returns a resource for querying a user's VPN accesses.
+     *
+     * @param int $user_id Internal user ID.
+     *
+     * @return AccessesResource User accesses collection resource.
      */
-    public function config(string $uuid) : Adapters\configAdapter 
-    {
-        return new Adapters\configAdapter($this->databaseConnector, $uuid);
+    public function accesses(int $user_id) : AccessesResource {
+        return new AccessesResource($this->dbConnector, $user_id);
     }
 
     /**
-     * Get object of class configAdapter
-     * 
-     * @param int $user_id UserID of user
-     * @return Adapters\configsAdapter
+     * Returns a resource for managing VPN subscriptions.
+     *
+     * @return SubsResource Subscription management resource.
      */
-    public function configs(int $user_id) : Adapters\configsAdapter
-    {
-        return new Adapters\configsAdapter($this->databaseConnector, $user_id);
+    public function subs() : SubsResource {
+        return new SubsResource($this->dbConnector);
     }
 
     /**
-     * Get object of class ApiUserClient
-     * 
-     * @param string $server_id Index of selected server
-     * @return Services\ApiUserClient
+     * Returns a resource for accessing a specific VPN server.
+     *
+     * The resource can retrieve server information and resolve
+     * the appropriate VPN node contract.
+     *
+     * @param string $code Unique server code.
+     *
+     * @return ServerResource Server management resource.
      */
-    public function apiClient(string $server_id) : Services\ApiUserClient
-    {
-        return new Services\ApiUserClient($server_id);
+    public function server(string $code) : ServerResource {
+        return new ServerResource($this->dbConnector, $this->httpClient, $this->btsConfig, $code);
     }
 
     /**
-     * Get object of class usersAdapter
-     * 
-     * @return Adapters\usersAdapter
+     * Returns a resource for managing VPN server records.
+     *
+     * @return ServersResource Servers collection resource.
      */
-    public function usersClient() : Adapters\usersAdapter 
-    {
-        return new Adapters\usersAdapter($this->databaseConnector);
+    public function servers() : ServersResource {
+        return new ServersResource($this->dbConnector);
     }
 
     /**
-     * Get object of class apiCronClient
-     * 
-     * @param string $server_id Index of selected server
-     * @return Services\ApiCronClient
+     * Returns a resource for managing payment transactions.
+     *
+     * @return TransactionResource Transaction management resource.
      */
-    public function apiCronClient(string $server_id) : Services\ApiCronClient
-    {
-        return new Services\ApiCronClient($server_id);
-    }
-
-    public function subsClient() : Services\SubsClient
-    {
-        return new Services\SubsClient($this->databaseConnector);
+    public function transaction() : TransactionResource {
+        return new TransactionResource($this->dbConnector);
     }
 }

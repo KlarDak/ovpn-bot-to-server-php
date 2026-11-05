@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+         bootstrap="tests/Integrations/bootstrap.php" colors="true" cacheResult="false"
+         failOnWarning="true" failOnRisky="true" failOnNotice="true">
+    <testsuites>
+        <testsuite name="MySQL integration">
+            <directory suffix="Test.php">tests/Integrations/Database</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
